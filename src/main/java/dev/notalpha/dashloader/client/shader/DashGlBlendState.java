@@ -1,7 +1,7 @@
 package dev.notalpha.dashloader.client.shader;
 
+import com.mojang.blaze3d.shaders.BlendMode;
 import dev.notalpha.dashloader.mixin.accessor.GlBlendStateAccessor;
-import net.minecraft.client.gl.GlBlendState;
 
 public final class DashGlBlendState {
 	public final int srcRgb;
@@ -35,11 +35,11 @@ public final class DashGlBlendState {
 				blendStateAccess.getBlendDisabled());
 	}
 
-	public DashGlBlendState(GlBlendState blendState) {
+	public DashGlBlendState(BlendMode blendState) {
 		this((GlBlendStateAccessor) blendState);
 	}
 
-	public GlBlendState export() {
+	public BlendMode export() {
 		return GlBlendStateAccessor.create(this.separateBlend, this.blendDisabled, this.srcRgb, this.dstRgb, this.srcAlpha, this.dstAlpha, this.mode);
 	}
 }

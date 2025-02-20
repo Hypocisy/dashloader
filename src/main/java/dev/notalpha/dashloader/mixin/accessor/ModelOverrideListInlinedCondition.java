@@ -1,15 +1,15 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ModelOverrideList.InlinedCondition.class)
+@Mixin(ItemOverrides.PropertyMatcher.class)
 public interface ModelOverrideListInlinedCondition {
 
 
 	@Invoker("<init>")
-	static ModelOverrideList.InlinedCondition newModelOverrideListInlinedCondition(int index, float threshold) {
+	static ItemOverrides.PropertyMatcher newModelOverrideListInlinedCondition(int index, float threshold) {
 		throw new AssertionError();
 	}
 

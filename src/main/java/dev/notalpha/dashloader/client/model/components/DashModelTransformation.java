@@ -1,26 +1,26 @@
 package dev.notalpha.dashloader.client.model.components;
 
 import dev.quantumfusion.hyphen.scan.annotations.DataNullable;
-import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.render.model.json.Transformation;
+import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 @DataNullable
 public final class DashModelTransformation {
-	public final Transformation thirdPersonLeftHand;
-	public final Transformation thirdPersonRightHand;
-	public final Transformation firstPersonLeftHand;
-	public final Transformation firstPersonRightHand;
-	public final Transformation head;
-	public final Transformation gui;
-	public final Transformation ground;
-	public final Transformation fixed;
+	public final ItemTransform thirdPersonLeftHand;
+	public final ItemTransform thirdPersonRightHand;
+	public final ItemTransform firstPersonLeftHand;
+	public final ItemTransform firstPersonRightHand;
+	public final ItemTransform head;
+	public final ItemTransform gui;
+	public final ItemTransform ground;
+	public final ItemTransform fixed;
 
 	public transient int nullTransformations = 0;
 
-	public DashModelTransformation(@Nullable Transformation thirdPersonLeftHand, @Nullable Transformation thirdPersonRightHand, @Nullable Transformation firstPersonLeftHand, @Nullable Transformation firstPersonRightHand, @Nullable Transformation head, @Nullable Transformation gui, @Nullable Transformation ground, @Nullable Transformation fixed) {
+	public DashModelTransformation(@Nullable ItemTransform thirdPersonLeftHand, @Nullable ItemTransform thirdPersonRightHand, @Nullable ItemTransform firstPersonLeftHand, @Nullable ItemTransform firstPersonRightHand, @Nullable ItemTransform head, @Nullable ItemTransform gui, @Nullable ItemTransform ground, @Nullable ItemTransform fixed) {
 		this.thirdPersonLeftHand = thirdPersonLeftHand;
 		this.thirdPersonRightHand = thirdPersonRightHand;
 		this.firstPersonLeftHand = firstPersonLeftHand;
@@ -31,7 +31,7 @@ public final class DashModelTransformation {
 		this.fixed = fixed;
 	}
 
-	public DashModelTransformation(ModelTransformation other) {
+	public DashModelTransformation(ItemTransforms other) {
 		this.thirdPersonLeftHand = this.createTransformation(other.thirdPersonLeftHand);
 		this.thirdPersonRightHand = this.createTransformation(other.thirdPersonRightHand);
 		this.firstPersonLeftHand = this.createTransformation(other.firstPersonLeftHand);
@@ -43,8 +43,8 @@ public final class DashModelTransformation {
 	}
 
 	@Nullable
-	public static DashModelTransformation createDashOrReturnNullIfDefault(ModelTransformation other) {
-		if (other == ModelTransformation.NONE) {
+	public static DashModelTransformation createDashOrReturnNullIfDefault(ItemTransforms other) {
+		if (other == ItemTransforms.NO_TRANSFORMS) {
 			return null;
 		}
 
@@ -57,16 +57,16 @@ public final class DashModelTransformation {
 		return out;
 	}
 
-	public static ModelTransformation exportOrDefault(@Nullable DashModelTransformation other) {
+	public static ItemTransforms exportOrDefault(@Nullable DashModelTransformation other) {
 		if (other == null) {
-			return ModelTransformation.NONE;
+			return ItemTransforms.NO_TRANSFORMS;
 		}
 
 		return other.export();
 	}
 
-	private Transformation createTransformation(Transformation transformation) {
-		if (transformation == Transformation.IDENTITY) {
+	private ItemTransform createTransformation(ItemTransform transformation) {
+		if (transformation == ItemTransform.NO_TRANSFORM) {
 			this.nullTransformations++;
 			return null;
 		} else {
@@ -74,12 +74,12 @@ public final class DashModelTransformation {
 		}
 	}
 
-	private Transformation unTransformation(Transformation transformation) {
-		return transformation == null ? Transformation.IDENTITY : transformation;
+	private ItemTransform unTransformation(ItemTransform transformation) {
+		return transformation == null ? ItemTransform.NO_TRANSFORM : transformation;
 	}
 
-	public ModelTransformation export() {
-		return new ModelTransformation(
+	public ItemTransforms export() {
+		return new ItemTransforms(
 				this.unTransformation(this.thirdPersonLeftHand),
 				this.unTransformation(this.thirdPersonRightHand),
 				this.unTransformation(this.firstPersonLeftHand),

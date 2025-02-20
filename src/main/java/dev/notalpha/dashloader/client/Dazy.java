@@ -1,7 +1,7 @@
 package dev.notalpha.dashloader.client;
 
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -11,8 +11,9 @@ public abstract class Dazy<V> {
 	@Nullable
 	private transient V loaded;
 
-	protected abstract V resolve(Function<SpriteIdentifier, Sprite> spriteLoader);
-	public V get(Function<SpriteIdentifier, Sprite> spriteLoader) {
+	protected abstract V resolve(Function<Material, TextureAtlasSprite> spriteLoader);
+
+	public V get(Function<Material, TextureAtlasSprite> spriteLoader) {
 		if (loaded != null) {
 			return loaded;
 		}

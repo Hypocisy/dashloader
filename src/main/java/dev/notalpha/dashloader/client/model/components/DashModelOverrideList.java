@@ -3,11 +3,11 @@ package dev.notalpha.dashloader.client.model.components;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.client.Dazy;
-import dev.notalpha.dashloader.mixin.accessor.ModelOverrideListAccessor;
-import net.minecraft.client.render.model.json.ModelOverrideList;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.util.Identifier;
+import dev.notalpha.dashloader.mixin.accessor.ItemOverridesListAccessor;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -21,9 +21,9 @@ public final class DashModelOverrideList {
 		this.conditionTypes = conditionTypes;
 	}
 
-	public DashModelOverrideList(ModelOverrideList modelOverrideList, RegistryWriter writer) {
-		final ModelOverrideList.BakedOverride[] overrides = ((ModelOverrideListAccessor) modelOverrideList).getOverrides();
-		final Identifier[] conditionTypes = ((ModelOverrideListAccessor) modelOverrideList).getConditionTypes();
+	public DashModelOverrideList(ItemOverrides modelOverrideList, RegistryWriter writer) {
+		final ItemOverrides.BakedOverride[] overrides = ((ItemOverridesListAccessor) modelOverrideList).getOverrides();
+		final ResourceLocation[] conditionTypes = ((ItemOverridesListAccessor) modelOverrideList).getProperties();
 
 		this.overrides = new DashModelOverrideListBakedOverride[overrides.length];
 		this.conditionTypes = new int[conditionTypes.length];
@@ -38,7 +38,7 @@ public final class DashModelOverrideList {
 	}
 
 	public DazyImpl export(RegistryReader reader) {
-		var conditionTypesOut = new Identifier[this.conditionTypes.length];
+		var conditionTypesOut = new ResourceLocation[this.conditionTypes.length];
 		for (int i = 0; i < this.conditionTypes.length; i++) {
 			conditionTypesOut[i] = reader.get(this.conditionTypes[i]);
 		}
@@ -70,25 +70,25 @@ public final class DashModelOverrideList {
 		return result;
 	}
 
-	public static class DazyImpl extends Dazy<ModelOverrideList> {
+	public static class DazyImpl extends Dazy<ItemOverrides> {
 		public final DashModelOverrideListBakedOverride.DazyImpl[] overrides;
-		public final Identifier[] conditionTypes; //identifiers
+		public final ResourceLocation[] conditionTypes; //identifiers
 
-		public DazyImpl(DashModelOverrideListBakedOverride.DazyImpl[] overrides, Identifier[] conditionTypes) {
+		public DazyImpl(DashModelOverrideListBakedOverride.DazyImpl[] overrides, ResourceLocation[] conditionTypes) {
 			this.overrides = overrides;
 			this.conditionTypes = conditionTypes;
 		}
 
 		@Override
-		protected ModelOverrideList resolve(Function<SpriteIdentifier, Sprite> spriteLoader) {
-			var out = ModelOverrideListAccessor.newModelOverrideList();
-			ModelOverrideListAccessor access = (ModelOverrideListAccessor) out;
+		protected ItemOverrides resolve(Function<Material, TextureAtlasSprite> spriteLoader) {
+			var out = ItemOverridesListAccessor.newModelOverrideList();
+			ItemOverridesListAccessor access = (ItemOverridesListAccessor) out;
 
-			var overridesOut = new ModelOverrideList.BakedOverride[this.overrides.length];
+			var overridesOut = new ItemOverrides.BakedOverride[this.overrides.length];
 			for (int i = 0; i < this.overrides.length; i++) {
 				overridesOut[i] = this.overrides[i].get(spriteLoader);
 			}
-			access.setConditionTypes(conditionTypes);
+			access.setProperties(conditionTypes);
 			access.setOverrides(overridesOut);
 			return out;
 		}

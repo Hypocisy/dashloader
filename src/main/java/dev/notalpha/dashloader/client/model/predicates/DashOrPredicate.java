@@ -3,46 +3,46 @@ package dev.notalpha.dashloader.client.model.predicates;
 import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
-import dev.notalpha.dashloader.mixin.accessor.OrMultipartModelSelectorAccessor;
-import net.minecraft.client.render.model.json.MultipartModelSelector;
-import net.minecraft.client.render.model.json.OrMultipartModelSelector;
+import dev.notalpha.dashloader.mixin.accessor.OrConditionAccessor;
+import net.minecraft.client.renderer.block.model.multipart.Condition;
+import net.minecraft.client.renderer.block.model.multipart.OrCondition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
-public final class DashOrPredicate implements DashObject<OrMultipartModelSelector, OrMultipartModelSelector> {
+public final class DashOrPredicate implements DashObject<OrCondition, OrCondition> {
 	public final int[] selectors;
 
 	public DashOrPredicate(int[] selectors) {
 		this.selectors = selectors;
 	}
 
-	public DashOrPredicate(OrMultipartModelSelector selector, RegistryWriter writer) {
-		OrMultipartModelSelectorAccessor access = ((OrMultipartModelSelectorAccessor) selector);
+	public DashOrPredicate(OrCondition selector, RegistryWriter writer) {
+		OrConditionAccessor access = ((OrConditionAccessor) selector);
 
-		Iterable<? extends MultipartModelSelector> accessSelectors = access.getSelectors();
+		Iterable<? extends Condition> accessSelectors = access.getConditions();
 		int count = 0;
-		for (MultipartModelSelector ignored : accessSelectors) {
+		for (Condition ignored : accessSelectors) {
 			count += 1;
 		}
 		this.selectors = new int[count];
 
 		int i = 0;
-		for (MultipartModelSelector accessSelector : accessSelectors) {
+		for (Condition accessSelector : accessSelectors) {
 			this.selectors[i++] = writer.add(accessSelector);
 		}
 	}
 
 	@Override
-	public OrMultipartModelSelector export(RegistryReader handler) {
-		final List<MultipartModelSelector> selectors = new ArrayList<>(this.selectors.length);
+	public OrCondition export(RegistryReader handler) {
+		final List<OrCondition> selectors = new ArrayList<>(this.selectors.length);
 		for (int accessSelector : this.selectors) {
 			selectors.add(handler.get(accessSelector));
 		}
 
-		return new OrMultipartModelSelector(selectors);
+		return new OrCondition(selectors);
 	}
 
 	@Override

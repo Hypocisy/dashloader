@@ -4,14 +4,14 @@ import dev.notalpha.dashloader.DashLoader;
 import dev.notalpha.dashloader.api.collection.IntObjectList;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
-import net.minecraft.client.texture.TextureStitcher;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.texture.Stitcher;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class DashTextureStitcher<T extends TextureStitcher.Stitchable> extends TextureStitcher<T> {
+public class DashTextureStitcher<T extends Stitcher.Entry> extends Stitcher<T> {
 	@Nullable
 	private ExportedData<T> data;
 	private int remainingSlots;
@@ -39,21 +39,21 @@ public class DashTextureStitcher<T extends TextureStitcher.Stitchable> extends T
 	}
 
 	@Override
-	public void add(T info) {
+	public void registerSprite(T info) {
 		if (data == null) {
-			super.add(info);
+			super.registerSprite(info);
 			return;
 		}
 
 		// If it starts recaching, doRecache will re-add the entries to the list.
-		var id = info.getId();
+		var id = info.name();
 		var slot = data.slots.get(id);
 		if (slot == null) {
 			DashLoader.LOG.warn("Sprite {} was not cached last time.", id);
 
 			doFallback();
 			// This was never added to the slot, so it would not get added to super.
-			this.add(info);
+			this.registerSprite(info);
 			return;
 		}
 
@@ -64,7 +64,7 @@ public class DashTextureStitcher<T extends TextureStitcher.Stitchable> extends T
 		remainingSlots -= 1;
 		slot.contents = info;
 
-		if (slot.width != info.getWidth() || slot.height != info.getHeight()) {
+		if (slot.width != info.width() || slot.height != info.height()) {
 			DashLoader.LOG.warn("Sprite {} had changed dimensions since last launch, falling back.", id);
 			doFallback();
 			return;
@@ -78,7 +78,7 @@ public class DashTextureStitcher<T extends TextureStitcher.Stitchable> extends T
 			data = null;
 			slots.forEach((identifier, tDashTextureSlot) -> {
 				if (tDashTextureSlot.contents != null) {
-					this.add(tDashTextureSlot.contents);
+					this.registerSprite(tDashTextureSlot.contents);
 				}
 			});
 		} else {
@@ -104,9 +104,9 @@ public class DashTextureStitcher<T extends TextureStitcher.Stitchable> extends T
 	}
 
 	@Override
-	public void getStitchedSprites(SpriteConsumer<T> consumer) {
+	public void gatherSprites(SpriteLoader<T> consumer) {
 		if (data == null) {
-			super.getStitchedSprites(consumer);
+			super.gatherSprites(consumer);
 		} else {
 			data.slots.forEach((identifier, dashTextureSlot) -> {
 				consumer.load(dashTextureSlot.contents, dashTextureSlot.x, dashTextureSlot.y);
@@ -114,7 +114,7 @@ public class DashTextureStitcher<T extends TextureStitcher.Stitchable> extends T
 		}
 	}
 
-	public static class Data<T extends TextureStitcher.Stitchable> {
+	public static class Data<T extends Stitcher.Entry> {
 		public final IntObjectList<DashTextureSlot<T>> slots;
 		public final int width;
 		public final int height;
@@ -125,17 +125,17 @@ public class DashTextureStitcher<T extends TextureStitcher.Stitchable> extends T
 			this.height = height;
 		}
 
-		public Data(RegistryWriter factory, TextureStitcher<T> stitcher) {
+		public Data(RegistryWriter factory, Stitcher<T> stitcher) {
 			this.slots = new IntObjectList<>();
-			stitcher.getStitchedSprites((info, x, y) -> {
-				this.slots.put(factory.add(info.getId()), new DashTextureSlot<>(x, y, info.getWidth(), info.getHeight()));
+			stitcher.gatherSprites((info, x, y) -> {
+				this.slots.put(factory.add(info.name()), new DashTextureSlot<>(x, y, info.width(), info.height()));
 			});
 			this.width = stitcher.getWidth();
 			this.height = stitcher.getHeight();
 		}
 
 		public ExportedData<T> export(RegistryReader reader) {
-			var output = new HashMap<Identifier, DashTextureSlot<T>>();
+			var output = new HashMap<ResourceLocation, DashTextureSlot<T>>();
 			this.slots.forEach((key, value) -> {
 				output.put(reader.get(key), value);
 			});
@@ -148,12 +148,12 @@ public class DashTextureStitcher<T extends TextureStitcher.Stitchable> extends T
 		}
 	}
 
-	public static class ExportedData<T extends TextureStitcher.Stitchable> {
-		public final Map<Identifier, DashTextureSlot<T>> slots;
+	public static class ExportedData<T extends Stitcher.Entry> {
+		public final Map<ResourceLocation, DashTextureSlot<T>> slots;
 		public final int width;
 		public final int height;
 
-		public ExportedData(Map<Identifier, DashTextureSlot<T>> slots, int width, int height) {
+		public ExportedData(Map<ResourceLocation, DashTextureSlot<T>> slots, int width, int height) {
 			this.slots = slots;
 			this.width = width;
 			this.height = height;

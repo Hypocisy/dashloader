@@ -2,28 +2,28 @@ package dev.notalpha.dashloader.mixin.option.cache.model;
 
 import dev.notalpha.dashloader.api.cache.CacheStatus;
 import dev.notalpha.dashloader.client.model.ModelModule;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.block.BlockModels;
-import net.minecraft.client.util.ModelIdentifier;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(BlockModels.class)
+@Mixin(BlockModelShaper.class)
 public class BlockModelsMixin {
 
 	@Inject(
-			method = "getModelId(Lnet/minecraft/block/BlockState;)Lnet/minecraft/client/util/ModelIdentifier;",
+			method = "stateToModelLocation(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/client/resources/model/ModelResourceLocation;",
 			at = @At(value = "HEAD"),
 			cancellable = true
 	)
-	private static void cacheModelId(BlockState state, CallbackInfoReturnable<ModelIdentifier> cir) {
+	private static void cacheModelId(BlockState state, CallbackInfoReturnable<ModelResourceLocation> cir) {
 		ModelModule.MISSING_READ.visit(CacheStatus.LOAD, map -> {
-			final Identifier identifier = map.get(state);
+			final ResourceLocation identifier = map.get(state);
 			if (identifier != null) {
-				cir.setReturnValue((ModelIdentifier) identifier);
+				cir.setReturnValue((ModelResourceLocation) identifier);
 			}
 		});
 	}

@@ -3,9 +3,12 @@ package dev.notalpha.dashloader.client.sprite;
 import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.mixin.accessor.SpriteAnimationFrameAccessor;
-import net.minecraft.client.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 
-public final class DashSpriteAnimationFrame implements DashObject<SpriteContents.AnimationFrame, SpriteContents.AnimationFrame> {
+import java.util.List;
+
+public final class DashSpriteAnimationFrame implements DashObject<SpriteContents.FrameInfo, SpriteContents.FrameInfo> {
 	public final int index;
 	public final int time;
 
@@ -14,14 +17,14 @@ public final class DashSpriteAnimationFrame implements DashObject<SpriteContents
 		this.time = time;
 	}
 
-	public DashSpriteAnimationFrame(SpriteContents.AnimationFrame animationFrame) {
+	public DashSpriteAnimationFrame(SpriteContents.FrameInfo animationFrame) {
 		SpriteAnimationFrameAccessor access = ((SpriteAnimationFrameAccessor) animationFrame);
 		this.index = access.getIndex();
 		this.time = access.getTime();
 	}
 
 	@Override
-	public SpriteContents.AnimationFrame export(RegistryReader exportHandler) {
+	public SpriteContents.FrameInfo export(RegistryReader exportHandler) {
 		return SpriteAnimationFrameAccessor.newSpriteFrame(this.index, this.time);
 	}
 

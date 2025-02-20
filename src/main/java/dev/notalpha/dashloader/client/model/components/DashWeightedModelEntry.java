@@ -3,8 +3,8 @@ package dev.notalpha.dashloader.client.model.components;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.client.model.DashWeightedBakedModel;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.util.collection.Weighted;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.util.random.WeightedEntry;
 
 public final class DashWeightedModelEntry {
 	public final int model;
@@ -15,8 +15,8 @@ public final class DashWeightedModelEntry {
 		this.weight = weight;
 	}
 
-	public DashWeightedModelEntry(Weighted.Present<BakedModel> entry, RegistryWriter writer) {
-		this(writer.add(entry.getData()), entry.getWeight().getValue());
+	public DashWeightedModelEntry(WeightedEntry.Wrapper<BakedModel> entry, RegistryWriter writer) {
+		this(writer.add(entry.getData()), entry.getWeight().asInt());
 	}
 
 

@@ -1,10 +1,10 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.gl.GlBlendState;
-import net.minecraft.client.gl.GlUniform;
-import net.minecraft.client.gl.ShaderProgram;
-import net.minecraft.client.gl.ShaderStage;
-import net.minecraft.client.render.VertexFormat;
+import com.mojang.blaze3d.shaders.BlendMode;
+import com.mojang.blaze3d.shaders.Program;
+import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.ShaderInstance;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -13,36 +13,43 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import java.util.List;
 import java.util.Map;
 
-@Mixin(ShaderProgram.class)
+@Mixin(ShaderInstance.class)
 public interface ShaderProgramAccessor {
 
-	@Accessor
+	@Accessor("samplerMap")
 	Map<String, Object> getSamplers();
 
-	@Accessor
+	@Accessor("samplerMap")
 	@Mutable
 	void setSamplers(Map<String, Object> samplers);
 
-	@Accessor
-	GlBlendState getBlendState();
+	@Accessor("blend")
+	BlendMode getBlendState();
 
-	@Accessor
+	@Accessor("blend")
 	@Mutable
-	void setBlendState(GlBlendState blendState);
+	void setBlendState(BlendMode blendState);
 
-	@Accessor
+	@Accessor("attributes")
 	List<Integer> getLoadedAttributeIds();
 
+	@Accessor("attributes")
+	@Mutable
+	void setLoadedAttributeIds(List<Integer> loadedAttributeIds);
 
-	@Accessor
-	Map<String, GlUniform> getLoadedUniforms();
+	@Accessor("uniformMap")
+	Map<String, Uniform> getLoadedUniforms();
 
-	@Accessor
-	List<GlUniform> getUniforms();
+	@Accessor("uniformMap")
+	@Mutable
+	void setLoadedUniforms(Map<String, Uniform> loadedUniforms);
+
+	@Accessor("uniforms")
+	List<Uniform> getUniforms();
 
 	@Accessor
 	@Mutable
-	void setLoadedAttributeIds(List<Integer> loadedAttributeIds);
+	void setUniforms(List<Uniform> uniforms);
 
 	@Accessor
 	List<String> getAttributeNames();
@@ -58,23 +65,15 @@ public interface ShaderProgramAccessor {
 	@Mutable
 	void setSamplerNames(List<String> samplerNames);
 
-	@Accessor
+	@Accessor("samplerLocations")
 	@Mutable
 	void setLoadedSamplerIds(List<Integer> loadedSamplerIds);
 
-	@Accessor
-	@Mutable
-	void setUniforms(List<GlUniform> uniforms);
-
-	@Accessor
+	@Accessor("uniformLocations")
 	@Mutable
 	void setLoadedUniformIds(List<Integer> loadedUniformIds);
 
-	@Accessor
-	@Mutable
-	void setLoadedUniforms(Map<String, GlUniform> loadedUniforms);
-
-	@Accessor
+	@Accessor("programId")
 	@Mutable
 	void setGlRef(int glRef);
 
@@ -82,19 +81,19 @@ public interface ShaderProgramAccessor {
 	@Mutable
 	void setName(String name);
 
-	@Accessor
+	@Accessor("vertexProgram")
 	@Mutable
-	void setVertexShader(ShaderStage vertexShader);
+	void setVertexShader(Program vertexShader);
 
-	@Accessor
+	@Accessor("fragmentProgram")
 	@Mutable
-	void setFragmentShader(ShaderStage fragmentShader);
+	void setFragmentShader(Program fragmentShader);
 
-	@Accessor
+	@Accessor("vertexFormat")
 	@Mutable
 	void setFormat(VertexFormat format);
 
-	@Invoker("loadReferences")
+	@Invoker("updateLocations")
 	void loadref();
 }
 

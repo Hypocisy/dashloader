@@ -22,7 +22,8 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return ConfigHandler.shouldApplyMixin(mixinClassName);
+		return true;
+//		return ConfigHandler.shouldApplyMixin(mixinClassName);
 	}
 
 	@Override

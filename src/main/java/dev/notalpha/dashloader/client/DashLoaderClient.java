@@ -1,14 +1,15 @@
 package dev.notalpha.dashloader.client;
 
-import dev.notalpha.dashloader.api.DashEntrypoint;
+import dev.notalpha.dashloader.DashLoader;
 import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.cache.Cache;
 import dev.notalpha.dashloader.api.cache.CacheFactory;
 import dev.notalpha.dashloader.client.blockstate.DashBlockState;
+import dev.notalpha.dashloader.client.event.DashLoaderInitEvent;
 import dev.notalpha.dashloader.client.font.*;
-import dev.notalpha.dashloader.client.identifier.DashIdentifier;
-import dev.notalpha.dashloader.client.identifier.DashModelIdentifier;
-import dev.notalpha.dashloader.client.identifier.DashSpriteIdentifier;
+import dev.notalpha.dashloader.client.identifier.DashModelResourceLocation;
+import dev.notalpha.dashloader.client.identifier.DashResourceLocation;
+import dev.notalpha.dashloader.client.identifier.DashSpriteMaterial;
 import dev.notalpha.dashloader.client.model.*;
 import dev.notalpha.dashloader.client.model.components.DashBakedQuad;
 import dev.notalpha.dashloader.client.model.components.DashBakedQuadCollection;
@@ -20,34 +21,33 @@ import dev.notalpha.dashloader.client.splash.SplashModule;
 import dev.notalpha.dashloader.client.sprite.DashImage;
 import dev.notalpha.dashloader.client.sprite.DashSprite;
 import dev.notalpha.dashloader.client.sprite.SpriteStitcherModule;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.render.model.json.AndMultipartModelSelector;
-import net.minecraft.client.render.model.json.MultipartModelSelector;
-import net.minecraft.client.render.model.json.OrMultipartModelSelector;
-import net.minecraft.client.render.model.json.SimpleMultipartModelSelector;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.ModelIdentifier;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.block.model.multipart.AndCondition;
+import net.minecraft.client.renderer.block.model.multipart.Condition;
+import net.minecraft.client.renderer.block.model.multipart.KeyValueCondition;
+import net.minecraft.client.renderer.block.model.multipart.OrCondition;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.nio.file.Path;
-import java.util.List;
 
-public class DashLoaderClient implements DashEntrypoint {
+//@Mod(DashLoader.MODID)
+@Mod.EventBusSubscriber(modid = DashLoader.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+public class DashLoaderClient {
 	public static final Cache CACHE;
 	public static boolean NEEDS_RELOAD = false;
 
 	static {
 		CacheFactory cacheManagerFactory = CacheFactory.create();
-		List<DashEntrypoint> entryPoints = FabricLoader.getInstance().getEntrypoints("dashloader", DashEntrypoint.class);
-		for (DashEntrypoint entryPoint : entryPoints) {
-			entryPoint.onDashLoaderInit(cacheManagerFactory);
-		}
 
 		CACHE = cacheManagerFactory.build(Path.of("./dashloader-cache/client/"));
 	}
 
-	@Override
-	public void onDashLoaderInit(CacheFactory factory) {
+	@SubscribeEvent
+	public void onDashLoaderInit(DashLoaderInitEvent event) {
+		var factory = event.getCacheManagerFactory();
 		factory.addModule(new FontModule());
 		factory.addModule(new ModelModule());
 		factory.addModule(new ShaderModule());
@@ -55,32 +55,32 @@ public class DashLoaderClient implements DashEntrypoint {
 		factory.addModule(new SpriteStitcherModule());
 
 		factory.addMissingHandler(
-				Identifier.class,
+				ResourceLocation.class,
 				(identifier, registryWriter) -> {
-					if (identifier instanceof ModelIdentifier m) {
-						return new DashModelIdentifier(m);
+					if (identifier instanceof ModelResourceLocation m) {
+						return new DashModelResourceLocation(m);
 					} else {
-						return new DashIdentifier(identifier);
+						return new DashResourceLocation(identifier);
 					}
 				}
 		);
 
 		factory.addMissingHandler(
-				Sprite.class,
+				TextureAtlasSprite.class,
 				DashSprite::new
 		);
 		factory.addMissingHandler(
-				MultipartModelSelector.class,
+				Condition.class,
 				(selector, writer) -> {
-					if (selector == MultipartModelSelector.TRUE) {
+					if (selector == Condition.TRUE) {
 						return new DashStaticPredicate(true);
-					} else if (selector == MultipartModelSelector.FALSE) {
+					} else if (selector == Condition.FALSE) {
 						return new DashStaticPredicate(false);
-					} else if (selector instanceof AndMultipartModelSelector s) {
+					} else if (selector instanceof AndCondition s) {
 						return new DashAndPredicate(s, writer);
-					} else if (selector instanceof OrMultipartModelSelector s) {
+					} else if (selector instanceof OrCondition s) {
 						return new DashOrPredicate(s, writer);
-					} else if (selector instanceof SimpleMultipartModelSelector s) {
+					} else if (selector instanceof KeyValueCondition s) {
 						return new DashSimplePredicate(s);
 					} else if (selector instanceof BooleanSelector s) {
 						return new DashStaticPredicate(s.selector);
@@ -92,15 +92,15 @@ public class DashLoaderClient implements DashEntrypoint {
 
 		//noinspection unchecked
 		for (Class<? extends DashObject<?, ?>> aClass : new Class[]{
-				DashIdentifier.class,
-				DashModelIdentifier.class,
+				DashResourceLocation.class,
+				DashModelResourceLocation.class,
 				DashBasicBakedModel.class,
 				DashBuiltinBakedModel.class,
 				DashMultipartBakedModel.class,
 				DashWeightedBakedModel.class,
 				DashBakedQuad.class,
 				DashBakedQuadCollection.class,
-				DashSpriteIdentifier.class,
+				DashSpriteMaterial.class,
 				DashAndPredicate.class,
 				DashOrPredicate.class,
 				DashSimplePredicate.class,

@@ -1,13 +1,13 @@
 package dev.notalpha.dashloader.client.shader;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.mixin.accessor.VertexFormatAccessor;
 import dev.quantumfusion.hyphen.scan.annotations.DataNullable;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormatElement;
-import net.minecraft.client.render.VertexFormats;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,20 +18,20 @@ public class DashVertexFormat implements DashObject<VertexFormat, VertexFormat> 
 	public static final List<VertexFormat> BUILT_IN = new ArrayList<>();
 
 	static {
-		BUILT_IN.add(VertexFormats.BLIT_SCREEN);
-		BUILT_IN.add(VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL);
-		BUILT_IN.add(VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL);
-		BUILT_IN.add(VertexFormats.POSITION_TEXTURE_COLOR_LIGHT);
-		BUILT_IN.add(VertexFormats.POSITION);
-		BUILT_IN.add(VertexFormats.POSITION_COLOR);
-		BUILT_IN.add(VertexFormats.LINES);
-		BUILT_IN.add(VertexFormats.POSITION_COLOR_LIGHT);
-		BUILT_IN.add(VertexFormats.POSITION_TEXTURE);
-		BUILT_IN.add(VertexFormats.POSITION_COLOR_TEXTURE);
-		BUILT_IN.add(VertexFormats.POSITION_TEXTURE_COLOR);
-		BUILT_IN.add(VertexFormats.POSITION_COLOR_TEXTURE_LIGHT);
-		BUILT_IN.add(VertexFormats.POSITION_TEXTURE_LIGHT_COLOR);
-		BUILT_IN.add(VertexFormats.POSITION_TEXTURE_COLOR_NORMAL);
+		BUILT_IN.add(DefaultVertexFormat.BLIT_SCREEN);
+		BUILT_IN.add(DefaultVertexFormat.BLOCK);
+		BUILT_IN.add(DefaultVertexFormat.NEW_ENTITY);
+		BUILT_IN.add(DefaultVertexFormat.PARTICLE);
+		BUILT_IN.add(DefaultVertexFormat.POSITION);
+		BUILT_IN.add(DefaultVertexFormat.POSITION_COLOR);
+		BUILT_IN.add(DefaultVertexFormat.POSITION_COLOR_NORMAL);
+		BUILT_IN.add(DefaultVertexFormat.POSITION_COLOR_LIGHTMAP);
+		BUILT_IN.add(DefaultVertexFormat.POSITION_TEX);
+		BUILT_IN.add(DefaultVertexFormat.POSITION_COLOR_TEX);
+		BUILT_IN.add(DefaultVertexFormat.POSITION_TEX_COLOR);
+		BUILT_IN.add(DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+		BUILT_IN.add(DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR);
+		BUILT_IN.add(DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
 	}
 
 	@DataNullable

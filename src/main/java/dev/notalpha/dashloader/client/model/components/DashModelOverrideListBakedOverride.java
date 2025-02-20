@@ -5,10 +5,10 @@ import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.client.Dazy;
 import dev.notalpha.dashloader.mixin.accessor.ModelOverrideListBakedOverrideAccessor;
 import dev.quantumfusion.hyphen.scan.annotations.DataNullable;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.json.ModelOverrideList;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -25,8 +25,8 @@ public final class DashModelOverrideListBakedOverride {
 		this.model = model;
 	}
 
-	public DashModelOverrideListBakedOverride(ModelOverrideList.BakedOverride override, RegistryWriter writer) {
-		final ModelOverrideList.InlinedCondition[] conditionsIn = ((ModelOverrideListBakedOverrideAccessor) override).getConditions();
+	public DashModelOverrideListBakedOverride(ItemOverrides.BakedOverride override, RegistryWriter writer) {
+		final ItemOverrides.PropertyMatcher[] conditionsIn = ((ModelOverrideListBakedOverrideAccessor) override).getMatchers();
 		BakedModel bakedModel = ((ModelOverrideListBakedOverrideAccessor) override).getModel();
 		this.model = bakedModel == null ? null : writer.add(bakedModel);
 
@@ -37,7 +37,7 @@ public final class DashModelOverrideListBakedOverride {
 	}
 
 	public DazyImpl export(RegistryReader reader) {
-		var conditionsOut = new ModelOverrideList.InlinedCondition[this.conditions.length];
+		var conditionsOut = new ItemOverrides.PropertyMatcher[this.conditions.length];
 		for (int i = 0; i < this.conditions.length; i++) {
 			conditionsOut[i] = this.conditions[i].export();
 		}
@@ -65,20 +65,20 @@ public final class DashModelOverrideListBakedOverride {
 	}
 
 
-	public static class DazyImpl extends Dazy<ModelOverrideList.BakedOverride> {
-		public final ModelOverrideList.InlinedCondition[] conditions;
+	public static class DazyImpl extends Dazy<ItemOverrides.BakedOverride> {
+		public final ItemOverrides.PropertyMatcher[] conditions;
 		@Nullable
 		public final Dazy<? extends BakedModel> model;
 
-		public DazyImpl(ModelOverrideList.InlinedCondition[] conditions, Dazy<? extends BakedModel> model) {
+		public DazyImpl(ItemOverrides.PropertyMatcher[] conditions, Dazy<? extends BakedModel> model) {
 			this.conditions = conditions;
 			this.model = model;
 		}
 
 		@Override
-		protected ModelOverrideList.BakedOverride resolve(Function<SpriteIdentifier, Sprite> spriteLoader) {
+		protected ItemOverrides.BakedOverride resolve(Function<Material, TextureAtlasSprite> spriteLoader) {
 			BakedModel bakedModel = model == null ? null : model.get(spriteLoader);
-			return ModelOverrideListBakedOverrideAccessor.newModelOverrideListBakedOverride(conditions, bakedModel);
+			return ModelOverrideListBakedOverrideAccessor.newItemOverridesBakedOverride(conditions, bakedModel);
 		}
 	}
 }

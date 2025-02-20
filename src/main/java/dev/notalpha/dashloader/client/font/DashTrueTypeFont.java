@@ -1,5 +1,6 @@
 package dev.notalpha.dashloader.client.font;
 
+import com.mojang.blaze3d.font.TrueTypeGlyphProvider;
 import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.cache.CacheStatus;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
@@ -7,10 +8,9 @@ import dev.notalpha.dashloader.io.IOHelper;
 import dev.notalpha.dashloader.misc.UnsafeHelper;
 import dev.notalpha.dashloader.mixin.accessor.TrueTypeFontAccessor;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TrueTypeFont;
-import net.minecraft.resource.Resource;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.stb.STBTruetype;
 import org.lwjgl.system.MemoryUtil;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public final class DashTrueTypeFont implements DashObject<TrueTypeFont, TrueTypeFont> {
+public final class DashTrueTypeFont implements DashObject<TrueTypeGlyphProvider, TrueTypeGlyphProvider> {
 	public final byte[] ttfBuffer;
 	public final float oversample;
 	public final List<Integer> excludedCharacters;
@@ -41,14 +41,14 @@ public final class DashTrueTypeFont implements DashObject<TrueTypeFont, TrueType
 		this.ascent = ascent;
 	}
 
-	public DashTrueTypeFont(TrueTypeFont font) {
+	public DashTrueTypeFont(TrueTypeGlyphProvider font) {
 		TrueTypeFontAccessor fontAccess = (TrueTypeFontAccessor) font;
-		final Identifier ttFont = FontModule.FONT_TO_IDENT.get(CacheStatus.SAVE).get(fontAccess.getInfo());
+		final ResourceLocation ttFont = FontModule.FONT_TO_IDENT.get(CacheStatus.SAVE).get(fontAccess.getInfo());
 		byte[] data = null;
 		try {
-			Optional<Resource> resource = MinecraftClient.getInstance().getResourceManager().getResource(new Identifier(ttFont.getNamespace(), "font/" + ttFont.getPath()));
+			Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(ttFont.getNamespace(), "font/" + ttFont.getPath()));
 			if (resource.isPresent()) {
-				data = IOHelper.streamToArray(resource.get().getInputStream());
+				data = IOHelper.streamToArray(resource.get().open());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -63,7 +63,7 @@ public final class DashTrueTypeFont implements DashObject<TrueTypeFont, TrueType
 	}
 
 	@Override
-	public TrueTypeFont export(RegistryReader handler) {
+	public TrueTypeGlyphProvider export(RegistryReader handler) {
 		STBTTFontinfo sTBTTFontinfo = STBTTFontinfo.malloc();
 		ByteBuffer byteBuffer2 = MemoryUtil.memAlloc(this.ttfBuffer.length);
 		byteBuffer2.put(this.ttfBuffer);
@@ -75,7 +75,7 @@ public final class DashTrueTypeFont implements DashObject<TrueTypeFont, TrueType
 				e.printStackTrace();
 			}
 		}
-		TrueTypeFont trueTypeFont = UnsafeHelper.allocateInstance(TrueTypeFont.class);
+		TrueTypeGlyphProvider trueTypeFont = UnsafeHelper.allocateInstance(TrueTypeGlyphProvider.class);
 		TrueTypeFontAccessor trueTypeFontAccess = (TrueTypeFontAccessor) trueTypeFont;
 		trueTypeFontAccess.setInfo(sTBTTFontinfo);
 		trueTypeFontAccess.setOversample(this.oversample);

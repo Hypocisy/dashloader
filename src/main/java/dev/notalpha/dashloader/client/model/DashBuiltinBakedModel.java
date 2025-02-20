@@ -9,16 +9,16 @@ import dev.notalpha.dashloader.client.model.components.DashModelTransformation;
 import dev.notalpha.dashloader.client.sprite.DashSprite;
 import dev.notalpha.dashloader.mixin.accessor.BuiltinBakedModelAccessor;
 import dev.quantumfusion.hyphen.scan.annotations.DataNullable;
-import net.minecraft.client.render.model.BuiltinBakedModel;
-import net.minecraft.client.render.model.json.ModelOverrideList;
-import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BuiltInModel;
+import net.minecraft.client.resources.model.Material;
 
 import java.util.Objects;
 import java.util.function.Function;
 
-public final class DashBuiltinBakedModel implements DashObject<BuiltinBakedModel, DashBuiltinBakedModel.DazyImpl> {
+public final class DashBuiltinBakedModel implements DashObject<BuiltInModel, DashBuiltinBakedModel.DazyImpl> {
 	@DataNullable
 	public final DashModelTransformation transformation;
 	public final DashModelOverrideList itemPropertyOverrides;
@@ -32,9 +32,9 @@ public final class DashBuiltinBakedModel implements DashObject<BuiltinBakedModel
 		this.sideLit = sideLit;
 	}
 
-	public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, RegistryWriter writer) {
+	public DashBuiltinBakedModel(BuiltInModel builtinBakedModel, RegistryWriter writer) {
 		BuiltinBakedModelAccessor access = ((BuiltinBakedModelAccessor) builtinBakedModel);
-		final ModelTransformation transformation = access.getTransformation();
+		final ItemTransforms transformation = access.getTransformation();
 		this.transformation = DashModelTransformation.createDashOrReturnNullIfDefault(transformation);
 		this.itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), writer);
 		this.spritePointer = writer.add(access.getSprite());
@@ -72,13 +72,13 @@ public final class DashBuiltinBakedModel implements DashObject<BuiltinBakedModel
 		return result;
 	}
 
-	public static class DazyImpl extends Dazy<BuiltinBakedModel> {
-		public final ModelTransformation transformation;
-		public final DashModelOverrideList.DazyImpl  itemPropertyOverrides;
+	public static class DazyImpl extends Dazy<BuiltInModel> {
+		public final ItemTransforms transformation;
+		public final DashModelOverrideList.DazyImpl itemPropertyOverrides;
 		public final DashSprite.DazyImpl sprite;
 		public final boolean sideLit;
 
-		public DazyImpl(ModelTransformation transformation, DashModelOverrideList.DazyImpl  itemPropertyOverrides, DashSprite.DazyImpl sprite, boolean sideLit) {
+		public DazyImpl(ItemTransforms transformation, DashModelOverrideList.DazyImpl itemPropertyOverrides, DashSprite.DazyImpl sprite, boolean sideLit) {
 			this.transformation = transformation;
 			this.itemPropertyOverrides = itemPropertyOverrides;
 			this.sprite = sprite;
@@ -86,10 +86,10 @@ public final class DashBuiltinBakedModel implements DashObject<BuiltinBakedModel
 		}
 
 		@Override
-		protected BuiltinBakedModel resolve(Function<SpriteIdentifier, Sprite> spriteLoader) {
-			Sprite sprite = this.sprite.get(spriteLoader);
-			ModelOverrideList list = itemPropertyOverrides.get(spriteLoader);
-			return  new BuiltinBakedModel(transformation, list, sprite, sideLit);
+		protected BuiltInModel resolve(Function<Material, TextureAtlasSprite> spriteLoader) {
+			TextureAtlasSprite sprite = this.sprite.get(spriteLoader);
+			ItemOverrides list = itemPropertyOverrides.get(spriteLoader);
+			return new BuiltInModel(transformation, list, sprite, sideLit);
 		}
 	}
 }

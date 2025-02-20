@@ -1,14 +1,14 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.gl.EffectShaderStage;
-import net.minecraft.client.gl.ShaderStage;
+import com.mojang.blaze3d.shaders.EffectProgram;
+import com.mojang.blaze3d.shaders.Program;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EffectShaderStage.class)
+@Mixin(EffectProgram.class)
 public interface EffectShaderStageAccessor {
 	@Invoker("<init>")
-	static EffectShaderStage create(ShaderStage.Type shaderType, int shaderRef, String name) {
+	static EffectProgram create(Program.Type shaderType, int shaderRef, String name) {
 		throw new AssertionError();
 	}
 }

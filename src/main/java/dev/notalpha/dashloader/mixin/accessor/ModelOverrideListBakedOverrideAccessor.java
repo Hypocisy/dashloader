@@ -1,21 +1,21 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.resources.model.BakedModel;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ModelOverrideList.BakedOverride.class)
+@Mixin(ItemOverrides.BakedOverride.class)
 public interface ModelOverrideListBakedOverrideAccessor {
 	@Invoker("<init>")
-	static ModelOverrideList.BakedOverride newModelOverrideListBakedOverride(ModelOverrideList.InlinedCondition[] conditions, @Nullable BakedModel model) {
+	static ItemOverrides.BakedOverride newItemOverridesBakedOverride(ItemOverrides.PropertyMatcher[] matchers, @Nullable BakedModel model) {
 		throw new AssertionError();
 	}
 
-	@Accessor
-	ModelOverrideList.InlinedCondition[] getConditions();
+	@Accessor("matchers")
+	ItemOverrides.PropertyMatcher[] getMatchers();
 
 	@Accessor
 	BakedModel getModel();

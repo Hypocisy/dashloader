@@ -1,10 +1,10 @@
 package dev.notalpha.dashloader.client.shader;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import dev.notalpha.dashloader.io.IOHelper;
 import dev.notalpha.dashloader.mixin.accessor.GlUniformAccessor;
 import dev.quantumfusion.hyphen.scan.annotations.DataNullable;
-import net.minecraft.client.gl.GlUniform;
-import net.minecraft.client.gl.ShaderProgram;
+import net.minecraft.client.renderer.ShaderInstance;
 
 public final class DashGlUniform {
 	public final int dataType;
@@ -23,18 +23,18 @@ public final class DashGlUniform {
 		this.floatData = floatData;
 	}
 
-	public DashGlUniform(GlUniform glUniform, boolean loaded) {
+	public DashGlUniform(Uniform glUniform, boolean loaded) {
 		GlUniformAccessor access = (GlUniformAccessor) glUniform;
 		this.intData = IOHelper.toArray(access.getIntData());
 		this.floatData = IOHelper.toArray(access.getFloatData());
-		this.dataType = glUniform.getDataType();
+		this.dataType = glUniform.getType();
 		this.name = glUniform.getName();
 		this.loaded = loaded;
 	}
 
 
-	public GlUniform export(ShaderProgram shader) {
-		GlUniform glUniform = new GlUniform(this.name, this.dataType, 0, shader);
+	public Uniform export(ShaderInstance shader) {
+		Uniform glUniform = new Uniform(this.name, this.dataType, 0, shader);
 		GlUniformAccessor access = (GlUniformAccessor) glUniform;
 		access.setIntData(IOHelper.fromArray(this.intData));
 		access.setFloatData(IOHelper.fromArray(this.floatData));

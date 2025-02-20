@@ -1,15 +1,16 @@
 package dev.notalpha.dashloader.client.ui;
 
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import dev.notalpha.dashloader.misc.HahaManager;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.*;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.Window;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.util.Mth;
+import org.apache.logging.log4j.core.pattern.TextRenderer;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -32,7 +33,7 @@ public class DashToast implements Toast {
 	public final DashToastState state;
 
 	private static void drawVertex(Matrix4f m4f, BufferBuilder bb, float z, float x, float y, Color color) {
-		bb.vertex(m4f, x, y, z).color(color.red(), color.green(), color.blue(), color.alpha()).next();
+		bb.vertex(m4f, x, y, z).color(color.red(), color.green(), color.blue(), color.alpha()).endVertex();
 	}
 
 	public int getWidth() {
@@ -53,7 +54,7 @@ public class DashToast implements Toast {
 
 
 	@Override
-	public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+	public Visibility render(GuiGraphics context, ToastComponent manager, long startTime) {
 		final int width = this.getWidth();
 		final int height = this.getHeight();
 		final int barY = height - PROGRESS_BAR_HEIGHT;
@@ -86,15 +87,15 @@ public class DashToast implements Toast {
 
 
 		// Setup scissor
-		MatrixStack matrices = context.getMatrices();
+		PoseStack poseStack = context.pose();
 		{
 			Vector4f vec = new Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
-			vec.mul(matrices.peek().getPositionMatrix());
-			Window window = manager.getClient().getWindow();
-			double scale = window.getScaleFactor();
+			vec.mul(poseStack.last().pose());
+			Window window = manager.getMinecraft().getWindow();
+			double scale = window.getGuiScale();
 			RenderSystem.enableScissor(
 					(int) (vec.x * scale),
-					(int) (window.getFramebufferHeight() - (vec.y * scale) - height * scale),
+					(int) (window.getHeight() - (vec.y * scale) - height * scale),
 					(int) (width * scale),
 					(int) (height * scale));
 		}
@@ -103,23 +104,23 @@ public class DashToast implements Toast {
 		DrawerUtil.drawRect(context, 0, 0, width, height, DrawerUtil.BACKGROUND_COLOR);
 
 		// Draw the background lines.
-		this.drawBatched(matrices, (matrix4f, bufferBuilder) -> {
+		this.drawBatched(poseStack, (matrix4f, bufferBuilder) -> {
 			for (Line line : lines) {
 				line.draw(matrix4f, bufferBuilder);
 			}
 		});
 
 
-		TextRenderer textRenderer = manager.getClient().textRenderer;
+		Font textRenderer = manager.getMinecraft().font;
 		// Draw progress text
 		String progressText = this.state.getProgressText();
-		int progressTextY = this.fact != null ? barY - PADDING : (barY / 2) + (textRenderer.fontHeight / 2);
+		int progressTextY = this.fact != null ? barY - PADDING : (barY / 2) + (textRenderer.lineHeight / 2);
 		DrawerUtil.drawText(context, textRenderer, PADDING, progressTextY, this.state.getText(), DrawerUtil.STATUS_COLOR);
-		DrawerUtil.drawText(context, textRenderer, (width - PADDING) - textRenderer.getWidth(progressText), progressTextY, progressText, DrawerUtil.STATUS_COLOR);
+		DrawerUtil.drawText(context, textRenderer, (width - PADDING) - textRenderer.self().width(progressText), progressTextY, progressText, DrawerUtil.STATUS_COLOR);
 
 		if (this.fact != null) {
 			// Draw the fun fact
-			DrawerUtil.drawText(context, textRenderer, PADDING, textRenderer.fontHeight + PADDING, this.fact, DrawerUtil.FOREGROUND_COLOR);
+			DrawerUtil.drawText(context, textRenderer, PADDING, textRenderer.lineHeight + PADDING, this.fact, DrawerUtil.FOREGROUND_COLOR);
 		}
 
 		// Draw progress bar
@@ -127,7 +128,7 @@ public class DashToast implements Toast {
 		DrawerUtil.drawRect(context, 0, barY, (int) (width * progress), PROGRESS_BAR_HEIGHT, progressColor);
 
 		// Epic rtx graphics. aka i slapped some glow on the things.
-		this.drawBatched(matrices, (matrix4f, bb) -> {
+		this.drawBatched(poseStack, (matrix4f, bb) -> {
 			// Line glow
 			for (Line line : lines) {
 				line.drawGlow(matrix4f, bb);
@@ -147,15 +148,15 @@ public class DashToast implements Toast {
 		return Visibility.SHOW;
 	}
 
-	private void drawBatched(MatrixStack ms, BiConsumer<Matrix4f, BufferBuilder> consumer) {
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+	private void drawBatched(PoseStack ms, BiConsumer<Matrix4f, BufferBuilder> consumer) {
+		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-		Matrix4f matrix = ms.peek().getPositionMatrix();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+		Matrix4f matrix = ms.last().pose();
 		consumer.accept(matrix, bufferBuilder);
-		BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+		BufferUploader.drawWithShader(bufferBuilder.end());
 		RenderSystem.disableBlend();
 	}
 
@@ -251,7 +252,7 @@ public class DashToast implements Toast {
 				case Crashed -> DrawerUtil.FAILED_COLOR;
 			};
 
-			return DrawerUtil.withOpacity(color, MathHelper.clamp(((this.x) / (this.width)), 0.0f, 1.0f));
+			return DrawerUtil.withOpacity(color, Mth.clamp(((this.x) / (this.width)), 0.0f, 1.0f));
 		}
 
 		public float getWeight() {

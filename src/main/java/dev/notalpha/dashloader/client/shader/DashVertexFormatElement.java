@@ -1,10 +1,10 @@
 package dev.notalpha.dashloader.client.shader;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.quantumfusion.hyphen.scan.annotations.DataNullable;
-import net.minecraft.client.render.VertexFormatElement;
-import net.minecraft.client.render.VertexFormats;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +13,14 @@ public class DashVertexFormatElement implements DashObject<VertexFormatElement, 
 	public static final List<VertexFormatElement> BUILT_IN = new ArrayList<>();
 
 	static {
-		BUILT_IN.add(VertexFormats.POSITION_ELEMENT);
-		BUILT_IN.add(VertexFormats.COLOR_ELEMENT);
-		BUILT_IN.add(VertexFormats.TEXTURE_ELEMENT);
-		BUILT_IN.add(VertexFormats.OVERLAY_ELEMENT);
-		BUILT_IN.add(VertexFormats.LIGHT_ELEMENT);
-		BUILT_IN.add(VertexFormats.NORMAL_ELEMENT);
-		BUILT_IN.add(VertexFormats.PADDING_ELEMENT);
-		BUILT_IN.add(VertexFormats.UV_ELEMENT);
+		BUILT_IN.add(DefaultVertexFormat.ELEMENT_POSITION);
+		BUILT_IN.add(DefaultVertexFormat.ELEMENT_COLOR);
+		BUILT_IN.add(DefaultVertexFormat.ELEMENT_UV0);
+		BUILT_IN.add(DefaultVertexFormat.ELEMENT_UV1);
+		BUILT_IN.add(DefaultVertexFormat.ELEMENT_UV2);
+		BUILT_IN.add(DefaultVertexFormat.ELEMENT_NORMAL);
+		BUILT_IN.add(DefaultVertexFormat.ELEMENT_PADDING);
+		BUILT_IN.add(DefaultVertexFormat.ELEMENT_UV);
 	}
 
 	@DataNullable
@@ -56,12 +56,12 @@ public class DashVertexFormatElement implements DashObject<VertexFormatElement, 
 	}
 
 	public static class DashVertexFormatElementData {
-		public final VertexFormatElement.ComponentType componentType;
-		public final VertexFormatElement.Type type;
+		public final VertexFormatElement.Type componentType;
+		public final VertexFormatElement.Usage type;
 		public final int uvIndex;
 		public final int componentCount;
 
-		public DashVertexFormatElementData(VertexFormatElement.ComponentType componentType, VertexFormatElement.Type type, int uvIndex, int componentCount) {
+		public DashVertexFormatElementData(VertexFormatElement.Type componentType, VertexFormatElement.Usage type, int uvIndex, int componentCount) {
 			this.componentType = componentType;
 			this.type = type;
 			this.uvIndex = uvIndex;
@@ -69,10 +69,10 @@ public class DashVertexFormatElement implements DashObject<VertexFormatElement, 
 		}
 
 		public DashVertexFormatElementData(VertexFormatElement element) {
-			this.componentType = element.getComponentType();
-			this.type = element.getType();
-			this.uvIndex = element.getUvIndex();
-			this.componentCount = element.getComponentCount();
+			this.componentType = element.getType();
+			this.type = element.getUsage();
+			this.uvIndex = element.getIndex();
+			this.componentCount = element.getCount();
 		}
 	}
 }

@@ -5,9 +5,9 @@ import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.taski.builtin.StepTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.SpriteLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.texture.SpriteLoader;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,7 +28,7 @@ public final class DashStitchResult {
 		this.regions = regions;
 	}
 
-	public DashStitchResult(SpriteLoader.StitchResult stitchResult, RegistryWriter writer, StepTask task) {
+	public DashStitchResult(SpriteLoader.Preparations stitchResult, RegistryWriter writer, StepTask task) {
 		this.width = stitchResult.width();
 		this.height = stitchResult.height();
 		this.mipLevel = stitchResult.mipLevel();
@@ -41,11 +41,11 @@ public final class DashStitchResult {
 		});
 	}
 
-	public SpriteLoader.StitchResult export(RegistryReader reader) {
-		Map<Identifier, Sprite> regions = new Object2ObjectOpenHashMap<>();
+	public SpriteLoader.Preparations export(RegistryReader reader) {
+		Map<ResourceLocation, TextureAtlasSprite> regions = new Object2ObjectOpenHashMap<>();
 		this.regions.forEach((key, value) -> regions.put(reader.get(key), reader.get(value)));
 
-		return new SpriteLoader.StitchResult(
+		return new SpriteLoader.Preparations(
 				this.width,
 				this.height,
 				this.mipLevel,

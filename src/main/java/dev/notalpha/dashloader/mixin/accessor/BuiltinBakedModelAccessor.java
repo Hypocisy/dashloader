@@ -1,25 +1,26 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.render.model.BuiltinBakedModel;
-import net.minecraft.client.render.model.json.ModelOverrideList;
-import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.texture.Sprite;
+
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BuiltInModel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(BuiltinBakedModel.class)
+@Mixin(BuiltInModel.class)
 public interface BuiltinBakedModelAccessor {
 
-	@Accessor
-	ModelTransformation getTransformation();
+	@Accessor("itemTransforms")
+	ItemTransforms getTransformation();
 
-	@Accessor
-	ModelOverrideList getItemPropertyOverrides();
+	@Accessor("overrides")
+	ItemOverrides getItemPropertyOverrides();
 
-	@Accessor
-	Sprite getSprite();
+	@Accessor("particleTexture")
+	TextureAtlasSprite getSprite();
 
-	@Accessor
+	@Accessor("usesBlockLight")
 	boolean getSideLit();
 }
 

@@ -6,13 +6,13 @@ import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.client.Dazy;
 import dev.notalpha.dashloader.mixin.accessor.MultipartBakedModelAccessor;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.MultipartBakedModel;
-import net.minecraft.client.render.model.json.MultipartModelSelector;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.block.model.multipart.Condition;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.MultiPartBakedModel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -21,25 +21,25 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class DashMultipartBakedModel implements DashObject<MultipartBakedModel, DashMultipartBakedModel.DazyImpl> {
+public class DashMultipartBakedModel implements DashObject<MultiPartBakedModel, DashMultipartBakedModel.DazyImpl> {
 	public final List<Component> components;
 
 	public DashMultipartBakedModel(List<Component> components) {
 		this.components = components;
 	}
 
-	public DashMultipartBakedModel(MultipartBakedModel model, RegistryWriter writer) {
+	public DashMultipartBakedModel(MultiPartBakedModel model, RegistryWriter writer) {
 		var access = ((MultipartBakedModelAccessor) model);
-		var accessComponents = access.getComponents();
+		var accessComponents = access.getSelectors();
 		int size = accessComponents.size();
 		this.components = new ArrayList<>();
 
 		var selectors = ModelModule.MULTIPART_PREDICATES.get(CacheStatus.SAVE).get(model);
 
 		for (int i = 0; i < size; i++) {
-			BakedModel componentModel = accessComponents.get(i).getRight();
-			MultipartModelSelector selector = selectors.getKey().get(i);
-			Identifier componentIdentifier = ModelModule.getStateManagerIdentifier(selectors.getRight());
+			BakedModel componentModel = accessComponents.get(i).getSecond();
+			Condition selector = selectors.getFirst().get(i);
+			ResourceLocation componentIdentifier = ModelModule.getStateManagerIdentifier(selectors.getSecond());
 			this.components.add(new Component(
 					writer.add(componentModel),
 					writer.add(selector),
@@ -53,8 +53,8 @@ public class DashMultipartBakedModel implements DashObject<MultipartBakedModel, 
 		List<DazyImpl.Component> componentsOut = new ArrayList<>(this.components.size());
 		this.components.forEach(component -> {
 			Dazy<? extends BakedModel> compModel = reader.get(component.model);
-			Identifier compIdentifier = reader.get(component.identifier);
-			MultipartModelSelector compSelector = reader.get(component.selector);
+			ResourceLocation compIdentifier = reader.get(component.identifier);
+			Condition compSelector = reader.get(component.selector);
 			Predicate<BlockState> predicate = compSelector.getPredicate(ModelModule.getStateManager(compIdentifier));
 			componentsOut.add(new DazyImpl.Component(compModel, predicate));
 		});
@@ -109,7 +109,7 @@ public class DashMultipartBakedModel implements DashObject<MultipartBakedModel, 
 		return components.hashCode();
 	}
 
-	public static class DazyImpl extends Dazy<MultipartBakedModel> {
+	public static class DazyImpl extends Dazy<MultiPartBakedModel> {
 		public final List<Component> components;
 
 		public DazyImpl(List<Component> components) {
@@ -117,7 +117,7 @@ public class DashMultipartBakedModel implements DashObject<MultipartBakedModel, 
 		}
 
 		@Override
-		protected MultipartBakedModel resolve(Function<SpriteIdentifier, Sprite> spriteLoader) {
+		protected MultiPartBakedModel resolve(Function<Material, TextureAtlasSprite> spriteLoader) {
 			List<Pair<Predicate<BlockState>, BakedModel>> componentsOut = new ArrayList<>(this.components.size());
 
 			for (Component component : components) {
@@ -126,10 +126,10 @@ public class DashMultipartBakedModel implements DashObject<MultipartBakedModel, 
 				componentsOut.add(Pair.of(selector, model));
 			}
 
-			MultipartBakedModel multipartBakedModel = new MultipartBakedModel(componentsOut);
+			MultiPartBakedModel multipartBakedModel = new MultiPartBakedModel(componentsOut);
 			MultipartBakedModelAccessor access = (MultipartBakedModelAccessor) multipartBakedModel;
 			// Fixes race condition which strangely does not happen in vanilla a ton?
-			access.setStateCache(Collections.synchronizedMap(access.getStateCache()));
+			access.setSelectorCache(Collections.synchronizedMap(access.getSelectorCache()));
 			return multipartBakedModel;
 		}
 

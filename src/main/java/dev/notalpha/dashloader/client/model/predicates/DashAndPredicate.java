@@ -3,45 +3,44 @@ package dev.notalpha.dashloader.client.model.predicates;
 import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
-import dev.notalpha.dashloader.mixin.accessor.AndMultipartModelSelectorAccessor;
-import net.minecraft.client.render.model.json.AndMultipartModelSelector;
-import net.minecraft.client.render.model.json.MultipartModelSelector;
+import dev.notalpha.dashloader.mixin.accessor.AndConditionAccessor;
+import net.minecraft.client.renderer.block.model.multipart.AndCondition;
+import net.minecraft.client.renderer.block.model.multipart.Condition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class DashAndPredicate implements DashObject<AndMultipartModelSelector, AndMultipartModelSelector> {
+public final class DashAndPredicate implements DashObject<AndCondition, AndCondition> {
 	public final int[] selectors;
 
 	public DashAndPredicate(int[] selectors) {
 		this.selectors = selectors;
 	}
 
-	public DashAndPredicate(AndMultipartModelSelector selector, RegistryWriter writer) {
-		AndMultipartModelSelectorAccessor access = ((AndMultipartModelSelectorAccessor) selector);
-
-		Iterable<? extends MultipartModelSelector> accessSelectors = access.getSelectors();
+	public DashAndPredicate(AndCondition selector, RegistryWriter writer) {
+		AndConditionAccessor access = ((AndConditionAccessor) selector);
+		Iterable<? extends Condition> accessSelectors = access.getConditions();
 		int count = 0;
-		for (MultipartModelSelector ignored : accessSelectors) {
+		for (Condition ignored : accessSelectors) {
 			count += 1;
 		}
 		this.selectors = new int[count];
 
 		int i = 0;
-		for (MultipartModelSelector accessSelector : accessSelectors) {
+		for (Condition accessSelector : accessSelectors) {
 			this.selectors[i++] = writer.add(accessSelector);
 		}
 	}
 
 	@Override
-	public AndMultipartModelSelector export(RegistryReader handler) {
-		final List<MultipartModelSelector> selectors = new ArrayList<>(this.selectors.length);
+	public AndCondition export(RegistryReader handler) {
+		final List<AndCondition> selectors = new ArrayList<>(this.selectors.length);
 		for (int accessSelector : this.selectors) {
 			selectors.add(handler.get(accessSelector));
 		}
 
-		return new AndMultipartModelSelector(selectors);
+		return new AndCondition(selectors);
 	}
 
 	@Override

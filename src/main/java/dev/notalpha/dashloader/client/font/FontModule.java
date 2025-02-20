@@ -1,5 +1,6 @@
 package dev.notalpha.dashloader.client.font;
 
+import com.mojang.blaze3d.font.GlyphProvider;
 import dev.notalpha.dashloader.api.CachingData;
 import dev.notalpha.dashloader.api.DashModule;
 import dev.notalpha.dashloader.api.cache.Cache;
@@ -10,16 +11,7 @@ import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.config.ConfigHandler;
 import dev.notalpha.dashloader.config.Option;
 import dev.notalpha.taski.builtin.StepTask;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.client.font.Font;
-import net.minecraft.client.font.FontManager;
-import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.stb.STBTTFontinfo;
 
 import java.util.ArrayList;
@@ -29,7 +21,7 @@ import java.util.Map;
 
 public class FontModule implements DashModule<FontModule.Data> {
 	public static final CachingData<ProviderIndex> DATA = new CachingData<>();
-	public static final CachingData<Map<STBTTFontinfo, Identifier>> FONT_TO_IDENT = new CachingData<>();
+	public static final CachingData<Map<STBTTFontinfo, ResourceLocation>> FONT_TO_IDENT = new CachingData<>();
 
 	@Override
 	public void reset(Cache cache) {
@@ -44,7 +36,7 @@ public class FontModule implements DashModule<FontModule.Data> {
 
 
 		int taskSize = 0;
-		for (List<Font> value : providerIndex.providers.values()) {
+		for (List<GlyphProvider> value : providerIndex.providers.values()) {
 			taskSize += value.size();
 		}
 		taskSize += providerIndex.allProviders.size();
@@ -53,7 +45,7 @@ public class FontModule implements DashModule<FontModule.Data> {
 		var providers = new IntObjectList<List<Integer>>();
 		providerIndex.providers.forEach((identifier, fonts) -> {
 			var values = new ArrayList<Integer>();
-			for (Font font : fonts) {
+			for (GlyphProvider font : fonts) {
 				values.add(factory.add(font));
 				task.next();
 			}
@@ -61,7 +53,7 @@ public class FontModule implements DashModule<FontModule.Data> {
 		});
 
 		var allProviders = new ArrayList<Integer>();
-		for (Font allProvider : providerIndex.allProviders) {
+		for (GlyphProvider allProvider : providerIndex.allProviders) {
 			allProviders.add(factory.add(allProvider));
 			task.next();
 		}
@@ -73,7 +65,7 @@ public class FontModule implements DashModule<FontModule.Data> {
 	public void load(Data data, RegistryReader reader, StepTask task) {
 		ProviderIndex index = new ProviderIndex(new HashMap<>(), new ArrayList<>());
 		data.fontMap.providers.forEach((key, value) -> {
-			var fonts = new ArrayList<Font>();
+			var fonts = new ArrayList<GlyphProvider>();
 			for (Integer i : value) {
 				fonts.add(reader.get(i));
 			}
@@ -115,11 +107,11 @@ public class FontModule implements DashModule<FontModule.Data> {
 	}
 
 	public static final class ProviderIndex {
-		public final Map<Identifier, List<Font>> providers;
-		public final List<Font> allProviders;
+		public final Map<ResourceLocation, List<GlyphProvider>> providers;
+		public final List<GlyphProvider> allProviders;
 
 
-		public ProviderIndex(Map<Identifier, List<Font>> providers, List<Font> allProviders) {
+		public ProviderIndex(Map<ResourceLocation, List<GlyphProvider>> providers, List<GlyphProvider> allProviders) {
 			this.providers = providers;
 			this.allProviders = allProviders;
 		}

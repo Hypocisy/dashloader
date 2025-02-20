@@ -1,9 +1,9 @@
 package dev.notalpha.dashloader.client.ui;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.text.Text;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 
 
@@ -24,18 +24,18 @@ public class DrawerUtil {
 	};
 
 
-	public static void drawRect(DrawContext context, int x, int y, int width, int height, Color color) {
+	public static void drawRect(GuiGraphics guiGraphics, int x, int y, int width, int height, Color color) {
 		final int x2 = width + x;
 		final int y2 = height + y;
-		context.fill(x, y, x2, y2, color.argb());
+		guiGraphics.fill(x, y, x2, y2, color.argb());
 	}
 
-	public static void drawText(DrawContext context, TextRenderer textRenderer, int x, int y, String text, Color color) {
-		context.drawTextWithShadow(textRenderer, Text.of(text), x, y - (textRenderer.fontHeight), color.argb());
+	public static void drawText(GuiGraphics context, Font textRenderer, int x, int y, String text, Color color) {
+		context.drawString(textRenderer, Component.literal(text), x, y - (textRenderer.lineHeight), color.argb());
 	}
 
 	private static void drawVertex(Matrix4f m4f, BufferBuilder bb, float x, float y, Color color) {
-		bb.vertex(m4f, x, y, 0f).color(color.red(), color.green(), color.blue(), color.alpha()).next();
+		bb.vertex(m4f, x, y, 0f).color(color.red(), color.green(), color.blue(), color.alpha()).endVertex();
 	}
 
 	public static void drawGlow(Matrix4f b4, BufferBuilder bb, float x, float y, float width, float height, float strength, Color color, boolean topLeft, boolean topRight, boolean bottomLeft, boolean bottomRight) {

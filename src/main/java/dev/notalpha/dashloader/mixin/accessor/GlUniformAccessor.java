@@ -1,6 +1,6 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.gl.GlUniform;
+import com.mojang.blaze3d.shaders.Uniform;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -8,19 +8,19 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-@Mixin(GlUniform.class)
+@Mixin(Uniform.class)
 public interface GlUniformAccessor {
-	@Accessor
+	@Accessor("intValues")
+	IntBuffer getIntData();
+
+	@Accessor("intValues")
 	@Mutable
 	void setIntData(IntBuffer intData);
 
-	@Accessor
-	IntBuffer getIntData();
-
-	@Accessor
+	@Accessor("floatValues")
 	FloatBuffer getFloatData();
 
-	@Accessor
+	@Accessor("floatValues")
 	@Mutable
 	void setFloatData(FloatBuffer floatData);
 

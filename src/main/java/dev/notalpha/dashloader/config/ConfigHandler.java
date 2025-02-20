@@ -3,7 +3,7 @@ package dev.notalpha.dashloader.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.notalpha.dashloader.DashLoader;
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,7 +14,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.EnumMap;
 
 public class ConfigHandler {
+	public static final ConfigHandler INSTANCE = new ConfigHandler(FMLPaths.CONFIGDIR.get().resolve("dashloader.json"));
 	private static final EnumMap<Option, Boolean> OPTION_ACTIVE = new EnumMap<>(Option.class);
+	private static final String DISABLE_OPTION_TAG = "dashloader:disableoption";
 
 	static {
 		for (Option value : Option.values()) {
@@ -22,8 +24,6 @@ public class ConfigHandler {
 		}
 	}
 
-	private static final String DISABLE_OPTION_TAG = "dashloader:disableoption";
-	public static final ConfigHandler INSTANCE = new ConfigHandler(FabricLoader.getInstance().getConfigDir().normalize().resolve("dashloader.json"));
 	private final Gson gson = new GsonBuilder().setLenient().setPrettyPrinting().create();
 	private final Path configPath;
 	public Config config = new Config();
@@ -41,7 +41,7 @@ public class ConfigHandler {
 			}
 		});
 
-		for (var modContainer : FabricLoader.getInstance().getAllMods()) {
+		/*for (var modContainer : FMLJavaModLoadingContext.get().getContainer().getInstance().getAllMods()) {
 			var mod = modContainer.getMetadata();
 			if (mod.containsCustomValue(DISABLE_OPTION_TAG)) {
 				for (var value : mod.getCustomValue(DISABLE_OPTION_TAG).getAsArray()) {
@@ -55,9 +55,21 @@ public class ConfigHandler {
 					}
 				}
 			}
-		}
+		}*/
 	}
 
+	public static boolean shouldApplyMixin(String name) {
+		for (Option value : Option.values()) {
+			if (name.contains(value.mixinContains)) {
+				return OPTION_ACTIVE.get(value);
+			}
+		}
+		return true;
+	}
+
+	public static boolean optionActive(Option option) {
+		return OPTION_ACTIVE.get(option);
+	}
 
 	public void reloadConfig() {
 		try {
@@ -83,18 +95,5 @@ public class ConfigHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public static boolean shouldApplyMixin(String name) {
-		for (Option value : Option.values()) {
-			if (name.contains(value.mixinContains)) {
-				return OPTION_ACTIVE.get(value);
-			}
-		}
-		return true;
-	}
-
-	public static boolean optionActive(Option option) {
-		return OPTION_ACTIVE.get(option);
 	}
 }

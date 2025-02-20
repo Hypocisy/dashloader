@@ -4,12 +4,15 @@ import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.mixin.accessor.ModelLoaderAccessor;
-import net.minecraft.block.BlockState;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import dev.notalpha.dashloader.mixin.accessor.ResourceLocationAccessor;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
+
 
 public final class DashBlockState implements DashObject<BlockState, BlockState> {
-	public static final Identifier ITEM_FRAME = new Identifier("dashloader:itemframewhy");
+	public static final ResourceLocation ITEM_FRAME = new ResourceLocation("dashloader:itemframewhy");
 	public final int owner;
 	public final int pos;
 
@@ -22,9 +25,9 @@ public final class DashBlockState implements DashObject<BlockState, BlockState> 
 		var block = blockState.getBlock();
 		int pos = -1;
 
-		Identifier owner = null;
+		ResourceLocation owner = null;
 		{
-			var states = ModelLoaderAccessor.getTheItemFrameThing().getStates();
+			var states = ModelLoaderAccessor.getTheItemFrameThing().getPossibleStates();
 			for (int i = 0; i < states.size(); i++) {
 				BlockState state = states.get(i);
 				if (state.equals(blockState)) {
@@ -36,12 +39,12 @@ public final class DashBlockState implements DashObject<BlockState, BlockState> 
 		}
 
 		if (pos == -1) {
-			var states = block.getStateManager().getStates();
+			var states = block.getStateDefinition().getPossibleStates();
 			for (int i = 0; i < states.size(); i++) {
 				BlockState state = states.get(i);
 				if (state.equals(blockState)) {
 					pos = i;
-					owner = Registries.BLOCK.getId(block);
+					owner = ForgeRegistries.BLOCKS.getKey(block);
 					break;
 				}
 			}
@@ -57,12 +60,12 @@ public final class DashBlockState implements DashObject<BlockState, BlockState> 
 
 	@Override
 	public BlockState export(final RegistryReader reader) {
-		final Identifier id = reader.get(this.owner);
+		final ResourceLocation id = reader.get(this.owner);
 		// if its item frame get its state from the model loader as mojank is mojank
 		if (id.equals(ITEM_FRAME)) {
-			return ModelLoaderAccessor.getTheItemFrameThing().getStates().get(this.pos);
+			return ModelLoaderAccessor.getTheItemFrameThing().getPossibleStates().get(this.pos);
 		} else {
-			return Registries.BLOCK.get(id).getStateManager().getStates().get(this.pos);
+			return ForgeRegistries.BLOCKS.getValue(id).getStateDefinition().getPossibleStates().get(this.pos);
 		}
 	}
 

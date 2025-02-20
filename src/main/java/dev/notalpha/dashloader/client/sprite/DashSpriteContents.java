@@ -1,12 +1,12 @@
 package dev.notalpha.dashloader.client.sprite;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.misc.UnsafeHelper;
 import dev.notalpha.dashloader.mixin.accessor.SpriteContentsAccessor;
 import dev.quantumfusion.hyphen.scan.annotations.DataNullable;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -31,11 +31,11 @@ public final class DashSpriteContents {
 
 	public DashSpriteContents(SpriteContents contents, RegistryWriter writer) {
 		var access = (SpriteContentsAccessor) contents;
-		this.id = writer.add(contents.getId());
+		this.id = writer.add(contents.name());
 		this.image = writer.add(access.getImage());
-		this.width = contents.getWidth();
-		this.height = contents.getHeight();
-		SpriteContents.Animation animation = access.getAnimation();
+		this.width = contents.width();
+		this.height = contents.height();
+		SpriteContents.AnimatedTexture animation = access.getAnimation();
 		this.animation = animation == null ? null : new DashSpriteAnimation(animation);
 	}
 

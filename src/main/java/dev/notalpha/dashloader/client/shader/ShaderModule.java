@@ -12,7 +12,7 @@ import dev.notalpha.dashloader.config.Option;
 import dev.notalpha.taski.builtin.StepTask;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.client.gl.ShaderProgram;
+import net.minecraft.client.renderer.ShaderInstance;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.Map;
 
 
 public class ShaderModule implements DashModule<ShaderModule.Data> {
-	public static final CachingData<HashMap<String, ShaderProgram>> SHADERS = new CachingData<>();
+	public static final CachingData<HashMap<String, ShaderInstance>> SHADERS = new CachingData<>();
 	public static final CachingData<Int2ObjectMap<List<String>>> WRITE_PROGRAM_SOURCES = new CachingData<>(CacheStatus.SAVE);
 
 	@Override
@@ -31,7 +31,7 @@ public class ShaderModule implements DashModule<ShaderModule.Data> {
 
 	@Override
 	public Data save(RegistryWriter factory, StepTask task) {
-		final Map<String, ShaderProgram> minecraftData = SHADERS.get(CacheStatus.SAVE);
+		final Map<String, ShaderInstance> minecraftData = SHADERS.get(CacheStatus.SAVE);
 		if (minecraftData == null) {
 			return null;
 		}
@@ -44,7 +44,7 @@ public class ShaderModule implements DashModule<ShaderModule.Data> {
 
 	@Override
 	public void load(Data data, RegistryReader reader, StepTask task) {
-		HashMap<String, ShaderProgram> out = new HashMap<>();
+		HashMap<String, ShaderInstance> out = new HashMap<>();
 		data.shaders.forEach((key, value) -> out.put(key, reader.get(value)));
 		SHADERS.set(CacheStatus.LOAD, out);
 	}

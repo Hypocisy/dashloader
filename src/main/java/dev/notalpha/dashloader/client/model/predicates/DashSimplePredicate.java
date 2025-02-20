@@ -3,10 +3,10 @@ package dev.notalpha.dashloader.client.model.predicates;
 import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.mixin.accessor.SimpleMultipartModelSelectorAccessor;
-import net.minecraft.client.render.model.json.SimpleMultipartModelSelector;
+import net.minecraft.client.renderer.block.model.multipart.KeyValueCondition;
 
 
-public final class DashSimplePredicate implements DashObject<SimpleMultipartModelSelector, SimpleMultipartModelSelector> {
+public final class DashSimplePredicate implements DashObject<KeyValueCondition, KeyValueCondition> {
 	public final String key;
 	public final String valueString;
 
@@ -15,15 +15,15 @@ public final class DashSimplePredicate implements DashObject<SimpleMultipartMode
 		this.valueString = valueString;
 	}
 
-	public DashSimplePredicate(SimpleMultipartModelSelector simpleMultipartModelSelector) {
+	public DashSimplePredicate(KeyValueCondition simpleMultipartModelSelector) {
 		var access = ((SimpleMultipartModelSelectorAccessor) simpleMultipartModelSelector);
 		this.key = access.getKey();
 		this.valueString = access.getValueString();
 	}
 
 	@Override
-	public SimpleMultipartModelSelector export(RegistryReader handler) {
-		return new SimpleMultipartModelSelector(this.key, this.valueString);
+	public KeyValueCondition export(RegistryReader handler) {
+		return new KeyValueCondition(this.key, this.valueString);
 	}
 
 	@Override

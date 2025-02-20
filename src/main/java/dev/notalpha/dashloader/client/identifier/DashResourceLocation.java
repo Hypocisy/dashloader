@@ -2,26 +2,26 @@ package dev.notalpha.dashloader.client.identifier;
 
 import dev.notalpha.dashloader.api.DashObject;
 import dev.notalpha.dashloader.api.registry.RegistryReader;
-import dev.notalpha.dashloader.mixin.accessor.IdentifierAccessor;
-import net.minecraft.util.Identifier;
+import dev.notalpha.dashloader.mixin.accessor.ResourceLocationAccessor;
+import net.minecraft.resources.ResourceLocation;
 
-public final class DashIdentifier implements DashObject<Identifier, Identifier> {
+public final class DashResourceLocation implements DashObject<ResourceLocation, ResourceLocation> {
 	public final String namespace;
 	public final String path;
 
-	public DashIdentifier(String namespace, String path) {
+	public DashResourceLocation(String namespace, String path) {
 		this.namespace = namespace;
 		this.path = path;
 	}
 
-	public DashIdentifier(Identifier identifier) {
+	public DashResourceLocation(ResourceLocation identifier) {
 		this.namespace = identifier.getNamespace();
 		this.path = identifier.getPath();
 	}
 
 	@Override
-	public Identifier export(RegistryReader exportHandler) {
-		return IdentifierAccessor.init(this.namespace, this.path, null);
+	public ResourceLocation export(RegistryReader exportHandler) {
+		return ResourceLocationAccessor.init(this.namespace, this.path, null);
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public final class DashIdentifier implements DashObject<Identifier, Identifier> 
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		DashIdentifier that = (DashIdentifier) o;
+		DashResourceLocation that = (DashResourceLocation) o;
 
 		if (!namespace.equals(that.namespace)) return false;
 		return path.equals(that.path);

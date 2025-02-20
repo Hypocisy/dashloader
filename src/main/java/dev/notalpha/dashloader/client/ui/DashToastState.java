@@ -5,14 +5,14 @@ import dev.notalpha.taski.ParentTask;
 import dev.notalpha.taski.Task;
 import dev.notalpha.taski.builtin.AbstractTask;
 import dev.notalpha.taski.builtin.StaticTask;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.Language;
+import net.minecraft.client.Minecraft;
+import net.minecraft.locale.Language;
 
 import java.util.HashMap;
 
 public final class DashToastState {
-	public Task task = new StaticTask("Idle", 0);
 	private final HashMap<String, String> translations;
+	public Task task = new StaticTask("Idle", 0);
 	private String overwriteText;
 	private DashToastStatus status;
 	private double currentProgress = 0;
@@ -21,17 +21,17 @@ public final class DashToastState {
 
 
 	public DashToastState() {
-		var langCode = MinecraftClient.getInstance().getLanguageManager().getLanguage();
+		var langCode = Minecraft.getInstance().getLanguageManager().getSelected();
 		DashLoader.LOG.info(langCode);
 		var stream = this.getClass().getClassLoader().getResourceAsStream("dashloader/lang/" + langCode + ".json");
 		this.translations = new HashMap<>();
 		if (stream != null) {
 			DashLoader.LOG.info("Found translations");
-			Language.load(stream, this.translations::put);
+			Language.loadFromJson(stream, this.translations::put);
 		} else {
 			var en_stream = this.getClass().getClassLoader().getResourceAsStream("dashloader/lang/en_us.json");
 			if (en_stream != null) {
-				Language.load(en_stream, this.translations::put);
+				Language.loadFromJson(en_stream, this.translations::put);
 			}
 		}
 	}

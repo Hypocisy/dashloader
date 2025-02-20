@@ -1,37 +1,37 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.gl.GlBlendState;
+import com.mojang.blaze3d.shaders.BlendMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(GlBlendState.class)
+@Mixin(BlendMode.class)
 public interface GlBlendStateAccessor {
 
 	@Invoker("<init>")
-	static GlBlendState create(boolean separateBlend, boolean blendDisabled, int srcRgb, int dstRgb, int srcAlpha, int dstAlpha, int mode) {
+	static BlendMode create(boolean separateBlend, boolean blendDisabled, int srcRgb, int dstRgb, int srcAlpha, int dstAlpha, int mode) {
 		throw new AssertionError();
 	}
 
-	@Accessor
+	@Accessor("srcColorFactor")
 	int getSrcRgb();
 
-	@Accessor
+	@Accessor("srcAlphaFactor")
 	int getSrcAlpha();
 
-	@Accessor
+	@Accessor("dstColorFactor")
 	int getDstRgb();
 
-	@Accessor
+	@Accessor("dstAlphaFactor")
 	int getDstAlpha();
 
-	@Accessor
+	@Accessor("blendFunc")
 	int getMode();
 
-	@Accessor
+	@Accessor("separateBlend")
 	boolean getSeparateBlend();
 
-	@Accessor
+	@Accessor("opaque")
 	boolean getBlendDisabled();
 
 

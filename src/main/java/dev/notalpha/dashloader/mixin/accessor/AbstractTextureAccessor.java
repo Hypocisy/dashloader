@@ -1,21 +1,21 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(AbstractTexture.class)
 public interface AbstractTextureAccessor {
 
-	@Accessor
+	@Accessor("blur")
 	boolean getBilinear();
 
-	@Accessor
+	@Accessor("blur")
 	void setBilinear(boolean bilinear);
 
-	@Accessor
+	@Accessor("mipmap")
 	boolean getMipmap();
 
-	@Accessor
+	@Accessor("mipmap")
 	void setMipmap(boolean mipmap);
 }

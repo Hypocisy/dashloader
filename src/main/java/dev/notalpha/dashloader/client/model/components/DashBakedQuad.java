@@ -5,10 +5,10 @@ import dev.notalpha.dashloader.api.registry.RegistryReader;
 import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.client.Dazy;
 import dev.notalpha.dashloader.client.sprite.DashSprite;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.core.Direction;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -21,7 +21,7 @@ public final class DashBakedQuad implements DashObject<BakedQuad, DashBakedQuad.
 	public final int sprite;
 
 	public DashBakedQuad(int[] vertexData, int colorIndex, Direction face, boolean shade,
-						 int sprite) {
+	                     int sprite) {
 		this.vertexData = vertexData;
 		this.colorIndex = colorIndex;
 		this.face = face;
@@ -30,7 +30,7 @@ public final class DashBakedQuad implements DashObject<BakedQuad, DashBakedQuad.
 	}
 
 	public DashBakedQuad(BakedQuad bakedQuad, RegistryWriter writer) {
-		this(bakedQuad.getVertexData(), bakedQuad.getColorIndex(), bakedQuad.getFace(), bakedQuad.hasShade(), writer.add(bakedQuad.getSprite()));
+		this(bakedQuad.getVertices(), bakedQuad.getTintIndex(), bakedQuad.getDirection(), bakedQuad.hasAmbientOcclusion(), writer.add(bakedQuad.getSprite()));
 	}
 
 	public DazyImpl export(RegistryReader handler) {
@@ -77,8 +77,8 @@ public final class DashBakedQuad implements DashObject<BakedQuad, DashBakedQuad.
 		}
 
 		@Override
-		protected BakedQuad resolve(Function<SpriteIdentifier, Sprite> spriteLoader) {
-			Sprite sprite = this.sprite.get(spriteLoader);
+		protected BakedQuad resolve(Function<Material, TextureAtlasSprite> spriteLoader) {
+			TextureAtlasSprite sprite = this.sprite.get(spriteLoader);
 			return new BakedQuad(vertexData, colorIndex, face, sprite, shade);
 		}
 	}

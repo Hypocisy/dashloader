@@ -3,10 +3,12 @@ package dev.notalpha.dashloader.mixin.option.cache.sprite;
 import dev.notalpha.dashloader.api.cache.CacheStatus;
 import dev.notalpha.dashloader.client.sprite.DashTextureStitcher;
 import dev.notalpha.dashloader.client.sprite.SpriteStitcherModule;
-import net.minecraft.client.texture.SpriteContents;
-import net.minecraft.client.texture.SpriteLoader;
-import net.minecraft.client.texture.TextureStitcher;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.SpriteLoader;
+import net.minecraft.client.renderer.texture.Stitcher;
+
+import net.minecraft.resources.ResourceLocation;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,22 +27,22 @@ public final class SpriteLoaderMixin {
 
 	@Shadow
 	@Final
-	private Identifier id;
+	private ResourceLocation location;
 
 	@Redirect(
 			method = "stitch",
-			at = @At(value = "NEW", target = "(III)Lnet/minecraft/client/texture/TextureStitcher;")
+			at = @At(value = "NEW", target = "(III)Lnet/minecraft/client/renderer/texture/Stitcher;")
 	)
-	private TextureStitcher dashloaderStitcherLoad(int maxWidth, int maxHeight, int mipLevel) {
+	private Stitcher<SpriteContents> dashloaderStitcherLoad(int maxWidth, int maxHeight, int mipLevel) {
 		if (SpriteStitcherModule.STITCHERS_LOAD.active(CacheStatus.LOAD)) {
 			var map = SpriteStitcherModule.STITCHERS_LOAD.get(CacheStatus.LOAD);
-			var data = map.get(id);
+			var data = map.get(location);
 			if (data != null) {
 				return new DashTextureStitcher(maxWidth, maxHeight, mipLevel, data);
 			}
 		}
 
-		return new TextureStitcher(maxWidth, maxHeight, mipLevel);
+		return new Stitcher<>(maxWidth, maxHeight, mipLevel);
 	}
 
 	@Inject(
@@ -48,9 +50,9 @@ public final class SpriteLoaderMixin {
 			at = @At(value = "RETURN"),
 			locals = LocalCapture.CAPTURE_FAILSOFT
 	)
-	private void dashloaderStitcherSave(List<SpriteContents> sprites, int mipLevel, Executor executor, CallbackInfoReturnable<SpriteLoader.StitchResult> cir, int i, TextureStitcher<SpriteContents> textureStitcher) {
+	private void dashloaderStitcherSave(List<SpriteContents> sprites, int mipLevel, Executor executor, CallbackInfoReturnable<SpriteLoader.Preparations> cir, int i, Stitcher<SpriteContents> textureStitcher) {
 		SpriteStitcherModule.STITCHERS_SAVE.visit(CacheStatus.SAVE, map -> {
-			map.add(Pair.of(id, textureStitcher));
+			map.add(Pair.of(location, textureStitcher));
 		});
 	}
 

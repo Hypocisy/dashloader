@@ -6,11 +6,12 @@ import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.client.Dazy;
 import dev.notalpha.dashloader.client.model.components.DashWeightedModelEntry;
 import dev.notalpha.dashloader.mixin.accessor.WeightedBakedModelAccessor;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.WeightedBakedModel;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.util.collection.Weighted;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.WeightedBakedModel;
+import net.minecraft.util.random.WeightedEntry;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +63,11 @@ public final class DashWeightedBakedModel implements DashObject<WeightedBakedMod
 		}
 
 		@Override
-		protected WeightedBakedModel resolve(Function<SpriteIdentifier, Sprite> spriteLoader) {
-			List<Weighted.Present<BakedModel>> models = new ArrayList<>();
+		protected WeightedBakedModel resolve(Function<Material, TextureAtlasSprite> spriteLoader) {
+			List<WeightedEntry.Wrapper<BakedModel>> models = new ArrayList<>();
 			for (Entry entry : this.entries) {
 				BakedModel model = entry.model.get(spriteLoader);
-				models.add(Weighted.of(model, entry.weight));
+				models.add(WeightedEntry.wrap(model, entry.weight));
 			}
 			return new WeightedBakedModel(models);
 		}

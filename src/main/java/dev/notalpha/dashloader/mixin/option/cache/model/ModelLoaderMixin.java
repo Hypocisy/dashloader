@@ -1,20 +1,20 @@
 package dev.notalpha.dashloader.mixin.option.cache.model;
 
-import dev.notalpha.dashloader.CacheImpl;
 import dev.notalpha.dashloader.DashLoader;
 import dev.notalpha.dashloader.api.cache.CacheStatus;
-import dev.notalpha.dashloader.client.DashLoaderClient;
 import dev.notalpha.dashloader.client.model.ModelModule;
 import dev.notalpha.dashloader.client.model.fallback.UnbakedBakedModel;
-import dev.notalpha.dashloader.misc.ObjectDumper;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.render.model.*;
-import net.minecraft.client.render.model.json.JsonUnbakedModel;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.TextureAtlasHolder;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -24,46 +24,41 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-@Mixin(value = ModelLoader.class, priority = 69420)
+@Mixin(value = ModelBakery.class, priority = 69420)
 public abstract class ModelLoaderMixin {
 
 	@Mutable
 	@Shadow
 	@Final
-	private Map<Identifier, UnbakedModel> unbakedModels;
+	private Map<ResourceLocation, UnbakedModel> unbakedCache;
 
 	@Shadow
-	protected abstract void method_4716(BlockState blockState);
+	protected abstract void lambda$new$7(BlockState blockState);
 
 	@Mutable
 	@Shadow
 	@Final
-	private Map<Identifier, UnbakedModel> modelsToBake;
+	private Map<ResourceLocation, UnbakedModel> topLevelModels;
 
-	@Shadow @Final private Map<Identifier, BakedModel> bakedModels;
+	@Shadow @Final private Map<ResourceLocation, BakedModel> bakedTopLevelModels;
 
 	@Inject(
 			method = "<init>",
-			at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = "ldc=static_definitions", shift = At.Shift.AFTER)
+			at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=static_definitions", shift = At.Shift.AFTER)
 	)
-	private void injectLoadedModels(BlockColors blockColors, Profiler profiler, Map<Identifier, JsonUnbakedModel> jsonUnbakedModels, Map<Identifier, List<ModelLoader.SourceTrackedData>> blockStates, CallbackInfo ci) {
+	private void injectLoadedModels(BlockColors blockColors, ProfilerFiller profiler, Map<ResourceLocation, BlockModel> jsonUnbakedModels, Map<ResourceLocation, List<ModelBakery.LoadedJson>> blockStates, CallbackInfo ci) {
 		ModelModule.MODELS_LOAD.visit(CacheStatus.LOAD, dashModels -> {
 			int total = dashModels.size();
-			this.unbakedModels.keySet().forEach(dashModels::remove);
-			this.modelsToBake.keySet().forEach(dashModels::remove);
+			this.unbakedCache.keySet().forEach(dashModels::remove);
+			this.topLevelModels.keySet().forEach(dashModels::remove);
 			DashLoader.LOG.info("Injecting {}/{} Cached Models", dashModels.size(), total);
-			this.unbakedModels.putAll(dashModels);
-			this.modelsToBake.putAll(dashModels);
+			this.unbakedCache.putAll(dashModels);
+			this.topLevelModels.putAll(dashModels);
 		});
 	}
 
@@ -74,12 +69,12 @@ public abstract class ModelLoaderMixin {
 			method = "<init>",
 			at = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z", ordinal = 0)
 	)
-	private boolean loadMissingModels(Iterator instance) {
+	private boolean loadMissingModels(Iterator<?> instance) {
 		var map = ModelModule.MISSING_READ.get(CacheStatus.LOAD);
 		if (map != null) {
 			for (BlockState blockState : map.keySet()) {
 				// load thing lambda
-				this.method_4716(blockState);
+				this.lambda$new$7(blockState);
 			}
 			DashLoader.LOG.info("Loaded {} unsupported models.", map.size());
 			return false;
@@ -88,17 +83,17 @@ public abstract class ModelLoaderMixin {
 	}
 
 	@Inject(
-			method = "bake",
+			method = "bakeModels",
 			at = @At(
 					value = "HEAD"
 			)
 	)
-	private void countModels(BiFunction<Identifier, SpriteIdentifier, Sprite> spriteLoader, CallbackInfo ci) {
+	private void countModels(BiFunction<ResourceLocation, Material, TextureAtlasSprite> spriteLoader, CallbackInfo ci) {
 		if (ModelModule.MODELS_LOAD.active(CacheStatus.LOAD)) {
 			// Cache stats
 			int cachedModels = 0;
 			int fallbackModels = 0;
-			for (UnbakedModel value : this.modelsToBake.values()) {
+			for (UnbakedModel value : this.topLevelModels.values()) {
 				if (value instanceof UnbakedBakedModel) {
 					cachedModels += 1;
 				} else {
@@ -114,12 +109,12 @@ public abstract class ModelLoaderMixin {
 	}
 
 	@Inject(
-			method = "bake",
+			method = "bakeModels",
 			at = @At(
 					value = "TAIL"
 			)
 	)
-	private void debug(BiFunction<Identifier, SpriteIdentifier, Sprite> spriteLoader, CallbackInfo ci) {
+	private void debug(BiFunction<ResourceLocation, Material, TextureAtlasSprite> spriteLoader, CallbackInfo ci) {
 //var models = new HashMap<Identifier, BakedModel>();
 //this.bakedModels.forEach((identifier, bakedModel) -> {
 //	if (

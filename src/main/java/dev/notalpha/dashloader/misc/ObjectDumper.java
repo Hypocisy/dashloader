@@ -1,6 +1,6 @@
 package dev.notalpha.dashloader.misc;
 
-import net.minecraft.client.texture.NativeImage;
+import com.mojang.blaze3d.platform.NativeImage;
 import org.apache.commons.lang3.builder.MultilineRecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
@@ -17,6 +17,7 @@ public class ObjectDumper {
 
 	public static class Wrapper {
 		public final Object data;
+
 		public Wrapper(Object data) {
 			this.data = data;
 		}
@@ -53,7 +54,7 @@ public class ObjectDumper {
 					}
 
 					if (value instanceof NativeImage image) {
-						buffer.append("Image{ format: ").append(image.getFormat()).append(", size: ").append(image.getWidth()).append("x").append(image.getHeight()).append(" }");
+						buffer.append("Image{ format: ").append(image.format()).append(", size: ").append(image.getWidth()).append("x").append(image.getHeight()).append(" }");
 						return;
 					}
 
@@ -102,11 +103,9 @@ public class ObjectDumper {
 					String s = builder.toString();
 					String result = s.split("@")[0];
 					buffer.append(result);
-				}
-				catch (InaccessibleObjectException e) {
+				} catch (InaccessibleObjectException e) {
 					throw e;
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 
 					buffer.append("unknown");

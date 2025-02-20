@@ -11,21 +11,21 @@ import dev.notalpha.dashloader.api.registry.RegistryWriter;
 import dev.notalpha.dashloader.config.ConfigHandler;
 import dev.notalpha.dashloader.config.Option;
 import dev.notalpha.taski.builtin.StepTask;
-import net.minecraft.client.texture.TextureStitcher;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.texture.Stitcher;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
 public class SpriteStitcherModule implements DashModule<SpriteStitcherModule.Data> {
 	//public final static CachingData<HashMap<Identifier, SpriteLoader.StitchResult>> ATLASES = new CachingData<>();
-	public final static CachingData<List<Pair<Identifier, TextureStitcher<?>>>> STITCHERS_SAVE = new CachingData<>(CacheStatus.SAVE);
-	public final static CachingData<Map<Identifier, DashTextureStitcher.ExportedData<?>>> STITCHERS_LOAD = new CachingData<>(CacheStatus.LOAD);
+	public final static CachingData<List<Pair<ResourceLocation, Stitcher<?>>>> STITCHERS_SAVE = new CachingData<>(CacheStatus.SAVE);
+	public final static CachingData<Map<ResourceLocation, DashTextureStitcher.ExportedData<?>>> STITCHERS_LOAD = new CachingData<>(CacheStatus.LOAD);
 	//public final static CachingData<HashMap<Identifier, Identifier>> ATLAS_IDS = new CachingData<>(CacheStatus.SAVE);
 
 	@Override
 	public void reset(Cache cache) {
-	//	ATLASES.reset(cache, new HashMap<>());
+		//	ATLASES.reset(cache, new HashMap<>());
 		STITCHERS_SAVE.reset(cache, new ArrayList<>());
 		STITCHERS_LOAD.reset(cache, new HashMap<>());
 		//ATLAS_IDS.reset(cache, new HashMap<>());
@@ -35,8 +35,8 @@ public class SpriteStitcherModule implements DashModule<SpriteStitcherModule.Dat
 	public Data save(RegistryWriter writer, StepTask task) {
 		task.reset(2);
 
-		var stitchers = new HashMap<Identifier, DashTextureStitcher.Data<?>>();
-		var duplicate = new HashSet<Identifier>();
+		var stitchers = new HashMap<ResourceLocation, DashTextureStitcher.Data<?>>();
+		var duplicate = new HashSet<ResourceLocation>();
 		task.run(new StepTask("Caching Stitchers"), (stepTask) -> {
 			stepTask.doForEach(STITCHERS_SAVE.get(CacheStatus.SAVE), (pair) -> {
 				var identifier = pair.getLeft();
@@ -80,7 +80,7 @@ public class SpriteStitcherModule implements DashModule<SpriteStitcherModule.Dat
 		//});
 //
 		//ATLASES.set(CacheStatus.LOAD, stitchResults);
-		var map = new HashMap<Identifier, DashTextureStitcher.ExportedData<?>>();
+		var map = new HashMap<ResourceLocation, DashTextureStitcher.ExportedData<?>>();
 		data.stitchers.forEach((key, value) -> {
 			map.put(reader.get(key), value.export(reader));
 		});
@@ -98,13 +98,13 @@ public class SpriteStitcherModule implements DashModule<SpriteStitcherModule.Dat
 	}
 
 	public static final class Data {
-	//	public final IntObjectList<DashStitchResult> results;
+		//	public final IntObjectList<DashStitchResult> results;
 		public final IntObjectList<DashTextureStitcher.Data<?>> stitchers;
 
 		public Data(
-			//	IntObjectList<DashStitchResult> results,
-			IntObjectList<DashTextureStitcher.Data<?>> stitchers) {
-		//	this.results = results;
+				//	IntObjectList<DashStitchResult> results,
+				IntObjectList<DashTextureStitcher.Data<?>> stitchers) {
+			//	this.results = results;
 			this.stitchers = stitchers;
 		}
 	}

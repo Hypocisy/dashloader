@@ -1,7 +1,7 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
+import com.mojang.blaze3d.font.TrueTypeGlyphProvider;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.client.font.TrueTypeFont;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -9,16 +9,16 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.nio.ByteBuffer;
 
-@Mixin(TrueTypeFont.class)
+@Mixin(TrueTypeGlyphProvider.class)
 public interface TrueTypeFontAccessor {
-	@Accessor
+	@Accessor("fontMemory")
 	@Mutable
 	void setBuffer(ByteBuffer thing);
 
-	@Accessor
+	@Accessor("font")
 	STBTTFontinfo getInfo();
 
-	@Accessor
+	@Accessor("font")
 	@Mutable
 	void setInfo(STBTTFontinfo thing);
 
@@ -29,10 +29,10 @@ public interface TrueTypeFontAccessor {
 	@Mutable
 	void setOversample(float thing);
 
-	@Accessor
+	@Accessor("skip")
 	IntSet getExcludedCharacters();
 
-	@Accessor
+	@Accessor("skip")
 	@Mutable
 	void setExcludedCharacters(IntSet thing);
 
@@ -50,10 +50,10 @@ public interface TrueTypeFontAccessor {
 	@Mutable
 	void setShiftY(float thing);
 
-	@Accessor
+	@Accessor("pointScale")
 	float getScaleFactor();
 
-	@Accessor
+	@Accessor("pointScale")
 	@Mutable
 	void setScaleFactor(float thing);
 

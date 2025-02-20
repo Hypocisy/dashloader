@@ -1,19 +1,18 @@
 package dev.notalpha.dashloader.mixin.option.cache.model;
 
+import com.mojang.datafixers.util.Pair;
 import dev.notalpha.dashloader.api.cache.CacheStatus;
 import dev.notalpha.dashloader.client.model.ModelModule;
 import dev.notalpha.dashloader.mixin.accessor.MultipartModelComponentAccessor;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.model.*;
-import net.minecraft.client.render.model.json.MultipartModelComponent;
-import net.minecraft.client.render.model.json.MultipartModelSelector;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.state.StateManager;
-import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.renderer.block.model.multipart.Condition;
+import net.minecraft.client.renderer.block.model.multipart.MultiPart;
+import net.minecraft.client.renderer.block.model.multipart.Selector;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.*;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,15 +25,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-@Mixin(MultipartUnbakedModel.class)
+@Mixin(MultiPart.class)
 public class MultipartUnbakedModelMixin {
 	@Shadow
 	@Final
-	private List<MultipartModelComponent> components;
+	private List<Selector> selectors;
 
 	@Shadow
 	@Final
-	private StateManager<Block, BlockState> stateFactory;
+	private StateDefinition<Block, BlockState> definition;
 
 	@Inject(
 			method = "bake",
@@ -42,12 +41,12 @@ public class MultipartUnbakedModelMixin {
 			locals = LocalCapture.CAPTURE_FAILSOFT,
 			cancellable = true
 	)
-	private void addPredicateInfo(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId, CallbackInfoReturnable<@Nullable BakedModel> cir, MultipartBakedModel.Builder builder) {
+	private void addPredicateInfo(ModelBaker pBaker, Function<Material, TextureAtlasSprite> pSpriteGetter, ModelState pState, ResourceLocation pLocation, CallbackInfoReturnable<BakedModel> cir, MultiPartBakedModel.Builder builder) {
 		ModelModule.MULTIPART_PREDICATES.visit(CacheStatus.SAVE, map -> {
-			var bakedModel = (MultipartBakedModel) builder.build();
-			var outSelectors = new ArrayList<MultipartModelSelector>();
-			this.components.forEach(multipartModelComponent -> outSelectors.add(((MultipartModelComponentAccessor) multipartModelComponent).getSelector()));
-			map.put(bakedModel, Pair.of(outSelectors, this.stateFactory));
+			var bakedModel = builder.build();
+			var outSelectors = new ArrayList<Condition>();
+			this.selectors.forEach(multipartModelComponent -> outSelectors.add(((MultipartModelComponentAccessor) multipartModelComponent).getCondition()));
+			map.put(bakedModel, Pair.of(outSelectors, this.definition));
 			cir.setReturnValue(bakedModel);
 		});
 	}

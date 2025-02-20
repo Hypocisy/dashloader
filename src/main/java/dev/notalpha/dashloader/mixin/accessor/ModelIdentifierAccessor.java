@@ -1,15 +1,15 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.util.ModelIdentifier;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ModelIdentifier.class)
+@Mixin(ModelResourceLocation.class)
 public interface ModelIdentifierAccessor {
 	@Invoker("<init>")
-	static ModelIdentifier init(String namespace, String path, String variant, @Nullable Identifier.ExtraData extraData) {
+	static ModelResourceLocation init(String namespace, String path, String variant, @Nullable ResourceLocation.Dummy extraData) {
 		throw new AssertionError();
 	}
 }

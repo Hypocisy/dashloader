@@ -1,19 +1,12 @@
 package dev.notalpha.dashloader.client.model.fallback;
 
 import dev.notalpha.dashloader.client.Dazy;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.Baker;
-import net.minecraft.client.render.model.ModelBakeSettings;
-import net.minecraft.client.render.model.UnbakedModel;
-import net.minecraft.client.render.model.json.JsonUnbakedModel;
-import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.*;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -27,16 +20,16 @@ public class UnbakedBakedModel implements UnbakedModel {
 	}
 
 	@Override
-	public Collection<Identifier> getModelDependencies() {
+	public Collection<ResourceLocation> getDependencies() {
 		return List.of();
 	}
 
 	@Override
-	public void setParents(Function<Identifier, UnbakedModel> modelLoader) {
+	public void resolveParents(Function<ResourceLocation, UnbakedModel> modelLoader) {
 	}
 
 	@Override
-	public BakedModel bake(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
+	public BakedModel bake(ModelBaker baker, Function<Material, TextureAtlasSprite> textureGetter, ModelState rotationContainer, ResourceLocation modelId) {
 		return this.bakedModel.get(textureGetter);
 	}
 }

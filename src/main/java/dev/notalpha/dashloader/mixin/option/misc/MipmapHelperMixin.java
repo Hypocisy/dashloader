@@ -1,32 +1,32 @@
 package dev.notalpha.dashloader.mixin.option.misc;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import dev.notalpha.dashloader.misc.UnsafeImage;
-import net.minecraft.client.texture.MipmapHelper;
-import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.renderer.texture.MipmapGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(MipmapHelper.class)
+@Mixin(MipmapGenerator.class)
 public abstract class MipmapHelperMixin {
 
 	@Shadow
-	private static int getColorComponent(int one, int two, int three, int four, int bits) {
+	private static int gammaBlend(int one, int two, int three, int four, int bits) {
 		return 0;
 	}
 
 	@Shadow
-	private static float getColorFraction(int value) {
+	private static float getPow22(int value) {
 		return 0;
 	}
 
 	@Shadow
-	private static boolean hasAlpha(NativeImage image) {
+	private static boolean hasTransparentPixel(NativeImage image) {
 		return false;
 	}
 
 	@Shadow
-	private static int blend(int one, int two, int three, int four, boolean checkAlpha) {
+	private static int alphaBlend(int one, int two, int three, int four, boolean checkAlpha) {
 		return 0;
 	}
 
@@ -77,31 +77,31 @@ public abstract class MipmapHelperMixin {
 							float g = 0.0F;
 							float b = 0.0F;
 							if (one >> 24 != 0) {
-								a += getColorFraction(one >> 24);
-								r += getColorFraction(one >> 16);
-								g += getColorFraction(one >> 8);
-								b += getColorFraction(one);
+								a += getPow22(one >> 24);
+								r += getPow22(one >> 16);
+								g += getPow22(one >> 8);
+								b += getPow22(one);
 							}
 
 							if (two >> 24 != 0) {
-								a += getColorFraction(two >> 24);
-								r += getColorFraction(two >> 16);
-								g += getColorFraction(two >> 8);
-								b += getColorFraction(two);
+								a += getPow22(two >> 24);
+								r += getPow22(two >> 16);
+								g += getPow22(two >> 8);
+								b += getPow22(two);
 							}
 
 							if (three >> 24 != 0) {
-								a += getColorFraction(three >> 24);
-								r += getColorFraction(three >> 16);
-								g += getColorFraction(three >> 8);
-								b += getColorFraction(three);
+								a += getPow22(three >> 24);
+								r += getPow22(three >> 16);
+								g += getPow22(three >> 8);
+								b += getPow22(three);
 							}
 
 							if (four >> 24 != 0) {
-								a += getColorFraction(four >> 24);
-								r += getColorFraction(four >> 16);
-								g += getColorFraction(four >> 8);
-								b += getColorFraction(four);
+								a += getPow22(four >> 24);
+								r += getPow22(four >> 16);
+								g += getPow22(four >> 8);
+								b += getPow22(four);
 							}
 
 							a /= 4.0F;
@@ -119,10 +119,10 @@ public abstract class MipmapHelperMixin {
 
 							targetImage.set(x, y, aI << 24 | rI << 16 | gI << 8 | bI);
 						} else {
-							int a = getColorComponent(one, two, three, four, 24);
-							int r = getColorComponent(one, two, three, four, 16);
-							int g = getColorComponent(one, two, three, four, 8);
-							int b = getColorComponent(one, two, three, four, 0);
+							int a = gammaBlend(one, two, three, four, 24);
+							int r = gammaBlend(one, two, three, four, 16);
+							int g = gammaBlend(one, two, three, four, 8);
+							int b = gammaBlend(one, two, three, four, 0);
 							targetImage.set(x, y, a << 24 | r << 16 | g << 8 | b);
 						}
 					}

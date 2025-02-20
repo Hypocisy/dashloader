@@ -1,17 +1,17 @@
 package dev.notalpha.dashloader.mixin.option.misc;
 
-import net.minecraft.client.render.model.ModelLoader;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.AffineTransformation;
+import com.mojang.math.Transformation;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(value = ModelLoader.BakedModelCacheKey.class, priority = 999)
+@Mixin(value = ModelBakery.BakedCacheKey.class, priority = 999)
 public class ModelLoaderBakedModelCacheKeyMixin {
 	@Shadow
 	@Final
-	private Identifier id;
+	private ResourceLocation id;
 
 	@Shadow
 	@Final
@@ -19,7 +19,7 @@ public class ModelLoaderBakedModelCacheKeyMixin {
 
 	@Shadow
 	@Final
-	private AffineTransformation transformation;
+	private Transformation transformation;
 
 	@Override
 	public boolean equals(Object o) {

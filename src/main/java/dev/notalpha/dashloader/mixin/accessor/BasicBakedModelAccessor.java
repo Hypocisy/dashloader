@@ -1,41 +1,41 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.render.model.BasicBakedModel;
-import net.minecraft.client.render.model.json.ModelOverrideList;
-import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.SimpleBakedModel;
+import net.minecraft.core.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
 import java.util.Map;
 
-@Mixin(BasicBakedModel.class)
+@Mixin(SimpleBakedModel.class)
 public interface BasicBakedModelAccessor {
 
-	@Accessor
+	@Accessor("unculledFaces")
 	List<BakedQuad> getQuads();
 
-	@Accessor
+	@Accessor("culledFaces")
 	Map<Direction, List<BakedQuad>> getFaceQuads();
 
-	@Accessor
+	@Accessor("hasAmbientOcclusion")
 	boolean getUsesAo();
 
-	@Accessor
+	@Accessor("isGui3d")
 	boolean getHasDepth();
 
-	@Accessor
+	@Accessor("usesBlockLight")
 	boolean getIsSideLit();
 
-	@Accessor
-	Sprite getSprite();
+	@Accessor("particleIcon")
+	TextureAtlasSprite getSprite();
 
-	@Accessor
-	ModelTransformation getTransformation();
+	@Accessor("transforms")
+	ItemTransforms getTransformation();
 
-	@Accessor
-	ModelOverrideList getItemPropertyOverrides();
+	@Accessor("overrides")
+	ItemOverrides getItemPropertyOverrides();
 }

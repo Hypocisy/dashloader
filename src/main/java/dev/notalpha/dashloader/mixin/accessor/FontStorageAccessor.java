@@ -1,40 +1,44 @@
 package dev.notalpha.dashloader.mixin.accessor;
 
+import com.mojang.blaze3d.font.GlyphProvider;
+import com.mojang.blaze3d.font.SheetGlyphInfo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.client.font.*;
+import net.minecraft.client.gui.font.CodepointMap;
+import net.minecraft.client.gui.font.FontSet;
+import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.List;
 
-@Mixin(FontStorage.class)
+@Mixin(FontSet.class)
 public interface FontStorageAccessor {
 	@Accessor
-	void setBlankGlyphRenderer(GlyphRenderer renderer);
+	void setMissingGlyph(BakedGlyph renderer);
 
 	@Accessor
-	void setWhiteRectangleGlyphRenderer(GlyphRenderer renderer);
+	void setWhiteGlyph(BakedGlyph renderer);
 
 	@Accessor
-	GlyphContainer<GlyphRenderer> getGlyphRendererCache();
+	CodepointMap<BakedGlyph> getGlyphs();
 
 	@Accessor
-	GlyphContainer<FontStorage.GlyphPair> getGlyphCache();
+	CodepointMap<FontSet.GlyphInfoFilter> getGlyphInfos();
 
 	@Accessor
-	Int2ObjectMap<IntList> getCharactersByWidth();
+	Int2ObjectMap<IntList> getGlyphsByWidth();
 
 	@Accessor
-	List<Font> getFonts();
+	List<GlyphProvider> getProviders();
+
+	@Invoker("stitch")
+	BakedGlyph stitch(SheetGlyphInfo c);
 
 	@Invoker
-	GlyphRenderer callGetGlyphRenderer(RenderableGlyph c);
+	void callCloseProviders();
 
 	@Invoker
-	void callCloseFonts();
-
-	@Invoker
-	void callCloseGlyphAtlases();
+	void callCloseTextures();
 }

@@ -1,7 +1,7 @@
 package dev.notalpha.dashloader.client.model.components;
 
 import dev.notalpha.dashloader.mixin.accessor.ModelOverrideListInlinedCondition;
-import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
 
 public final class DashModelOverrideListInlinedCondition {
 	public final int index;
@@ -12,11 +12,11 @@ public final class DashModelOverrideListInlinedCondition {
 		this.threshold = threshold;
 	}
 
-	public DashModelOverrideListInlinedCondition(ModelOverrideList.InlinedCondition inlinedCondition) {
-		this(inlinedCondition.index, inlinedCondition.threshold);
+	public DashModelOverrideListInlinedCondition(ItemOverrides.PropertyMatcher inlinedCondition) {
+		this(inlinedCondition.index, inlinedCondition.value);
 	}
 
-	public ModelOverrideList.InlinedCondition export() {
+	public ItemOverrides.PropertyMatcher export() {
 		return ModelOverrideListInlinedCondition.newModelOverrideListInlinedCondition(this.index, this.threshold);
 	}
 
